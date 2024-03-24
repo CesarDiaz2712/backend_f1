@@ -5,6 +5,9 @@ import java.sql.Date;
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MapsId;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
@@ -17,6 +20,17 @@ public class ContractDriver {
     
     @EmbeddedId
     private ContractDriverKey contractDriverKey;
+
+    
+    @ManyToOne
+    @MapsId("driverId")
+    @JoinColumn(name = "driver_id")
+    DriverFormulaOne driverFormula;
+    
+    @ManyToOne
+    @MapsId("teamId")
+    @JoinColumn(name = "team_id")
+    TeamFormulaOne team;
 
     @Column(name= "date_initial_contract")
     private Date initialContractDate;
@@ -32,11 +46,39 @@ public class ContractDriver {
     @Temporal(TemporalType.DATE)
     private Date dateUpdated;
 
-    public ContractDriver(Date initialContractDate, Date finalContractDate, Date datecreated, Date dateUpdated) {
+    
+
+    public ContractDriver(ContractDriverKey contractDriverKey,
+            Date initialContractDate, Date finalContractDate, Date datecreated, Date dateUpdated) {
+        this.contractDriverKey = contractDriverKey;
         this.initialContractDate = initialContractDate;
         this.finalContractDate = finalContractDate;
         this.datecreated = datecreated;
         this.dateUpdated = dateUpdated;
+    }
+
+    public ContractDriverKey getContractDriverKey() {
+        return contractDriverKey;
+    }
+
+    public void setContractDriverKey(ContractDriverKey contractDriverKey) {
+        this.contractDriverKey = contractDriverKey;
+    }
+
+    public DriverFormulaOne getDriverFormula() {
+        return driverFormula;
+    }
+
+    public void setDriverFormula(DriverFormulaOne driverFormula) {
+        this.driverFormula = driverFormula;
+    }
+
+    public TeamFormulaOne getTeam() {
+        return team;
+    }
+
+    public void setTeam(TeamFormulaOne team) {
+        this.team = team;
     }
 
     public Date getInitialContractDate() {

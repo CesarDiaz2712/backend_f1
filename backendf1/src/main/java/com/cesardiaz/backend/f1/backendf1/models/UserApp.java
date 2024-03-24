@@ -1,8 +1,13 @@
 package com.cesardiaz.backend.f1.backendf1.models;
 
 
-import java.util.ArrayList;
+import java.time.LocalDate;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -11,11 +16,17 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "user_app")
+@NoArgsConstructor
+@AllArgsConstructor
 @NamedQuery(name = "UserApp.findAll", query = "SELECT u FROM UserApp u")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class UserApp extends AbstractPersistableCustom<Long>{
 
 
@@ -28,15 +39,25 @@ public class UserApp extends AbstractPersistableCustom<Long>{
     @Column(name = "password")
     private String password;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-   	@JoinTable(name = "m_group_client", joinColumns = @JoinColumn(name = "client_id"), inverseJoinColumns = @JoinColumn(name = "group_id"))
-    private Collection<Role> roles = new ArrayList<>();
+    @Column(name= "date_created")
+    private LocalDate dateCreated;
+    
+    @Column(name= "date_updated")
+    private LocalDate dateUpdated;
 
-    public UserApp(String name, String username, String password, Collection<Role> roles) {
+    @ManyToMany(fetch = FetchType.LAZY)
+   	@JoinTable(name = "role_user_app", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private Set<Role> roles = new HashSet<Role>();
+
+    public UserApp(String name, String username, String password, Set<Role> roles) {
         this.name = name;
         this.username = username;
         this.password = password;
         this.roles = roles;
+    }
+
+    public UserApp(Long id){
+        setId(id);
     }
 
     public String getName() {
@@ -63,12 +84,28 @@ public class UserApp extends AbstractPersistableCustom<Long>{
         this.password = password;
     }
 
-    public Collection<Role> getRoles() {
+    public Set<Role> getRoles() {
         return roles;
     }
 
-    public void setRoles(Collection<Role> roles) {
-        this.roles = roles;
+    public void setRole(Role role) {
+        this.roles.add(role);
+    }
+
+    public LocalDate getDateCreated() {
+        return dateCreated;
+    }
+
+    public void setDateCreated(LocalDate dateCreated) {
+        this.dateCreated = dateCreated;
+    }
+
+    public LocalDate getDateUpdated() {
+        return dateUpdated;
+    }
+
+    public void setDateUpdated(LocalDate dateUpdated) {
+        this.dateUpdated = dateUpdated;
     }
 
     

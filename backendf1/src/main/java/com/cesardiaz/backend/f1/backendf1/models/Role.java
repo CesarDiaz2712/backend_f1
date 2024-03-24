@@ -4,27 +4,48 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
 @Entity
 @NamedQuery(name = "Role.findAll", query = "SELECT dr FROM Role dr")
 @Table(name = "role")
+@NoArgsConstructor
+@AllArgsConstructor
 public class Role extends AbstractPersistableCustom<Long>{
     
 
-    @Column(name = "name", columnDefinition = "varchar(20)")
-    private String name;
+    @Column(name = "name", columnDefinition = "varchar(45)")
+    private String authority;
+    
+    @Column(name = "description", columnDefinition = "varchar(45)")
+    private String description;
 
-    public Role(Long id, String name) {
+    
+    public Role(Long id) {
         setId(id);
-        this.name = name;
     }
 
-    public String getName() {
-        return name;
+    public Role(Long id, String authority, String description) {
+        setId(id);
+        this.authority = authority;
+        this.description = description;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public String getAuthority() {
+        return authority;
+    }
+
+    public void setAuthority(String authority) {
+        this.authority = authority;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     

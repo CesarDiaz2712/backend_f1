@@ -6,10 +6,12 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "team")
 @NamedQuery(name = "TeamFormulaOne.findAll", query = "SELECT tf FROM TeamFormulaOne tf")
+@NoArgsConstructor
 public class TeamFormulaOne extends AbstractPersistableCustom<Long>{
 
     @Column(name = "name", columnDefinition = "varchar(30)", unique = true)
