@@ -1,6 +1,7 @@
 package com.cesardiaz.backend.f1.backendf1.models;
 
-import java.sql.Date;
+
+import java.util.Date;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
@@ -12,19 +13,20 @@ import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import lombok.NoArgsConstructor;
 
 @Entity
 @NamedQuery(name = "ContractDriver.findAll", query = "SELECT cd FROM ContractDriver cd")
 @Table(name = "contract_driver")
+@NoArgsConstructor
 public class ContractDriver {
     
     @EmbeddedId
     private ContractDriverKey contractDriverKey;
 
-    
     @ManyToOne
     @MapsId("driverId")
-    @JoinColumn(name = "driver_id")
+    @JoinColumn(name = "race_driver_id")
     DriverFormulaOne driverFormula;
     
     @ManyToOne
@@ -40,29 +42,53 @@ public class ContractDriver {
     
     @Column(name= "date_created")
     @Temporal(TemporalType.DATE)
-    private Date datecreated;
+    private Date dateCreated;
     
     @Column(name= "date_updated")
     @Temporal(TemporalType.DATE)
     private Date dateUpdated;
 
+    @Column(name= "status")
+    private Boolean status;
+
     
 
-    public ContractDriver(ContractDriverKey contractDriverKey,
-            Date initialContractDate, Date finalContractDate, Date datecreated, Date dateUpdated) {
-        this.contractDriverKey = contractDriverKey;
+    private  ContractDriver(DriverFormulaOne driverFormula, TeamFormulaOne team, Date initialContractDate,
+            Date finalContractDate, Date dateCreated, Date dateUpdated, boolean isActivated) {
+        this.driverFormula = driverFormula;
+        this.team = team;
         this.initialContractDate = initialContractDate;
         this.finalContractDate = finalContractDate;
-        this.datecreated = datecreated;
+        this.dateCreated = dateCreated;
         this.dateUpdated = dateUpdated;
+        contractDriverKey= new ContractDriverKey();
+        contractDriverKey.setDriverId(driverFormula.getId());
+        contractDriverKey.setTeamId(team.getId());
+        this.status=isActivated;
     }
 
-    public ContractDriverKey getContractDriverKey() {
-        return contractDriverKey;
+    private  ContractDriver(DriverFormulaOne driverFormula, TeamFormulaOne team, Date initialContractDate,
+        Date finalContractDate, Date dateCreated, Date dateUpdated) {
+            this.driverFormula = driverFormula;
+            this.team = team;
+            this.initialContractDate = initialContractDate;
+            this.finalContractDate = finalContractDate;
+            this.dateCreated = dateCreated;
+            this.dateUpdated = dateUpdated;
+            contractDriverKey= new ContractDriverKey();
+            contractDriverKey.setDriverId(driverFormula.getId());
+            contractDriverKey.setTeamId(team.getId());
+            this.status=true;
     }
 
-    public void setContractDriverKey(ContractDriverKey contractDriverKey) {
-        this.contractDriverKey = contractDriverKey;
+    public static ContractDriver instance(DriverFormulaOne driverFormula, TeamFormulaOne team, Date initialContractDate,
+    Date finalContractDate, Date dateCreated, Date dateUpdated){
+        return new ContractDriver(driverFormula, team, initialContractDate, finalContractDate, dateCreated, dateUpdated);
+    }
+
+    public static ContractDriver instance(DriverFormulaOne driverFormula, TeamFormulaOne team, Date initialContractDate,
+    Date finalContractDate, Date dateCreated, Date dateUpdated, boolean isActivated){
+        return new ContractDriver(driverFormula, team, initialContractDate, finalContractDate, dateCreated, dateUpdated, isActivated);
     }
 
     public DriverFormulaOne getDriverFormula() {
@@ -97,12 +123,12 @@ public class ContractDriver {
         this.finalContractDate = finalContractDate;
     }
 
-    public Date getDatecreated() {
-        return datecreated;
+    public Date getDateCreated() {
+        return dateCreated;
     }
 
-    public void setDatecreated(Date datecreated) {
-        this.datecreated = datecreated;
+    public void setDateCreated(Date datecreated) {
+        this.dateCreated = datecreated;
     }
 
     public Date getDateUpdated() {
@@ -113,5 +139,13 @@ public class ContractDriver {
         this.dateUpdated = dateUpdated;
     }
 
+    public Boolean getStatus() {
+        return status;
+    }
+
+    public void setStatus(Boolean status) {
+        this.status = status;
+    }
+    
     
 }

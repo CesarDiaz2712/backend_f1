@@ -1,19 +1,24 @@
 package com.cesardiaz.backend.f1.backendf1.services;
 
-import java.time.LocalDate;
 import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.cesardiaz.backend.f1.backendf1.components.TeamConvertDTO;
 import com.cesardiaz.backend.f1.backendf1.constans.MessageCustom;
+import com.cesardiaz.backend.f1.backendf1.dtos.TeamDTO;
 import com.cesardiaz.backend.f1.backendf1.models.TeamFormulaOne;
 import com.cesardiaz.backend.f1.backendf1.projections.TeamView;
 import com.cesardiaz.backend.f1.backendf1.repositories.TeamRepository;
 import com.cesardiaz.backend.f1.backendf1.utils.ResponseEntityCustom;
+import com.cesardiaz.backend.f1.backendf1.utils.TeamCommandEnum;
 import com.cesardiaz.backend.f1.backendf1.utils.TeamEnum;
 import com.cesardiaz.backend.f1.backendf1.utils.validation.TeamValidationRequest;
 
@@ -24,10 +29,12 @@ public class TeamServiceImp implements TeamService {
 
     private final TeamValidationRequest teamValidationRequest;
     private final TeamRepository teamRepository;
+    private final TeamConvertDTO teamConvertDTO;
 
-    public TeamServiceImp(TeamValidationRequest teamValidationRequest, TeamRepository teamRepository) {
+    public TeamServiceImp(TeamValidationRequest teamValidationRequest, TeamRepository teamRepository, TeamConvertDTO teamConvertDTO) {
         this.teamValidationRequest = teamValidationRequest;
         this.teamRepository = teamRepository;
+        this.teamConvertDTO = teamConvertDTO;
 
     }
 
@@ -88,6 +95,40 @@ public class TeamServiceImp implements TeamService {
             e.printStackTrace();
             throw new RuntimeException("Internal Server Error");
         }
+    }
+
+    @Override
+    public ResponseEntity<TeamDTO> getTeamById(Long teamId) {
+        // TODO Auto-generated method stub
+
+        Optional<TeamFormulaOne> teamOptional = teamRepository.findById(teamId);
+
+        if(teamOptional.isPresent()){
+            TeamFormulaOne team = teamOptional.get();
+
+            return ResponseEntity.ok().body(teamConvertDTO.convertEntityToDTO(team));
+        }else{
+
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @Override
+    public ResponseEntity<Page<TeamView>> getTeams(TeamCommandEnum command, int page, int size) {
+        // TODO Auto-generated method stub
+        if(command != null){
+
+            Page<TeamView> responsePage = null;
+            if(command.getCode().equals("all_teams")){
+                responsePage = teamRepository.findAllTeams(PageRequest.of(page, size, Sort.by("name")), false);
+            }else{
+                
+                responsePage = teamRepository.findAllTeams(PageRequest.of(page, size, Sort.by("name")), true);
+            }
+
+            return ResponseEntity.ok().body(responsePage);
+        }
+        return ResponseEntity.internalServerError().build();
     }
 
 }

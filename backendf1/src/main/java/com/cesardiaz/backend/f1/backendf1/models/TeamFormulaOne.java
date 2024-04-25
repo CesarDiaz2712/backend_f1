@@ -47,6 +47,10 @@ public class TeamFormulaOne extends AbstractPersistableCustom<Long>{
         this.dateUpdated = dateUpdated;
     }
 
+    public TeamFormulaOne(Long id){
+        setId(id);
+    }
+    
     public String getName() {
         return name;
     }

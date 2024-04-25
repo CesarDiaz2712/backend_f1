@@ -17,6 +17,9 @@ public class ContractDriverKey {
         this.teamId = teamId;
     }
 
+    public ContractDriverKey() {
+    }
+
     public Long getDriverId() {
         return driverId;
     }

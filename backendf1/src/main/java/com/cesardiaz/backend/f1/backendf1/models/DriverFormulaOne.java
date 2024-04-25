@@ -1,6 +1,5 @@
 package com.cesardiaz.backend.f1.backendf1.models;
 
-import java.sql.Date;
 import java.time.LocalDate;
 import java.util.Set;
 
@@ -13,8 +12,6 @@ import jakarta.persistence.NamedQuery;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import lombok.NoArgsConstructor;
 
 @Entity
@@ -60,6 +57,9 @@ public class DriverFormulaOne extends AbstractPersistableCustom<Long>{
         this.user = user;
     }
     
+    public DriverFormulaOne(Long id){
+        setId(id);
+    }
 
     public DriverFormulaOne(Long id, String name, String lastname, String gamertag, String numberDriver, LocalDate datecreated,
         LocalDate dateUpdated, UserApp user) {
