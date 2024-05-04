@@ -73,6 +73,11 @@ public class DriverFormulaOne extends AbstractPersistableCustom<Long>{
         this.user = user;
     }
 
+    public static DriverFormulaOne createDriver(Long id, String name, String lastname, String gamertag, String numberDriver, LocalDate datecreated,
+    LocalDate dateUpdated, UserApp user){
+        return new DriverFormulaOne(id, name, lastname, gamertag, numberDriver, datecreated, dateUpdated, user);
+    }
+
     public String getName() {
         return name;
     }

@@ -1,6 +1,8 @@
 package com.cesardiaz.backend.f1.backendf1.dtos;
 
+import lombok.Builder;
 
+@Builder
 public class DriverDTO {
 
     private Long id;
@@ -107,4 +109,16 @@ public class DriverDTO {
     String dateUpdated, UserAppDTO user){
         return new DriverDTO(id, name, lastname, gamertag, numberDriver, datecreated, dateUpdated, user);
     }
+
+
+    public TeamDTO getTeam() {
+        return team;
+    }
+
+
+    public void setTeam(TeamDTO team) {
+        this.team = team;
+    }
+
+    
 }

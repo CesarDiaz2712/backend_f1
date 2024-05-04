@@ -12,6 +12,9 @@ import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.annotation.Rollback;
 
 import com.cesardiaz.backend.f1.backendf1.helpers.DriverHelper;
@@ -19,6 +22,7 @@ import com.cesardiaz.backend.f1.backendf1.helpers.UserHelper;
 import com.cesardiaz.backend.f1.backendf1.models.DriverFormulaOne;
 import com.cesardiaz.backend.f1.backendf1.models.Role;
 import com.cesardiaz.backend.f1.backendf1.models.UserApp;
+import com.cesardiaz.backend.f1.backendf1.projections.DriverDataView;
 import com.cesardiaz.backend.f1.backendf1.repositories.DriverFormulaRepository;
 import com.cesardiaz.backend.f1.backendf1.repositories.UserRepository;
 
@@ -92,5 +96,23 @@ public class DriverRepositoryTest {
     public void saveDriveSuccess(){
         Optional<DriverFormulaOne> driver = driverFormulaRepository.findByGamertag("Stricli");
         assertThat(driver).isEmpty();
+    }
+
+    @Test
+    public void findAllDriversActive(){
+        int page = 0;
+        int size = 1;
+        Page<DriverDataView> drivePage = driverFormulaRepository.findAllDriversByStatusActivated(PageRequest.of(page, size, Sort.by("id")));
+
+        assertThat(drivePage).isNotEmpty();
+    }
+    
+    @Test
+    public void findAllDriversRegistred(){
+        int page = 0;
+        int size = 1;
+        Page<DriverDataView> drivePage = driverFormulaRepository.findAllDrivers(PageRequest.of(page, size, Sort.by("id")));
+
+        assertThat(drivePage).isNotEmpty();
     }
 }

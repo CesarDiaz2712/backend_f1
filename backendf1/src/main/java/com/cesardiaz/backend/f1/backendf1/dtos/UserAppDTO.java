@@ -2,7 +2,6 @@ package com.cesardiaz.backend.f1.backendf1.dtos;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
