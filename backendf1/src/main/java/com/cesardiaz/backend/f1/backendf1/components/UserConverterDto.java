@@ -20,7 +20,7 @@ public class UserConverterDto {
         Collection<RoleDTO> rolesDto= new ArrayList<>();
         if(userApp.getRoles()!=null && userApp.getRoles().size()>0){
             for(Role role : userApp.getRoles()){
-                rolesDto.add(new RoleDTO(role.getId(), role.getAuthority(), role.getDescription()));
+                rolesDto.add(new RoleDTO(role.getId(), role.getName(), role.getDescription()));
             }
         }
 

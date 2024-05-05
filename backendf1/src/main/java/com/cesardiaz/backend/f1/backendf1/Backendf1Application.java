@@ -18,10 +18,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.annotation.PostConstruct;
 
-@SpringBootApplication(exclude = SecurityAutoConfiguration.class)
+@SpringBootApplication
 @Configuration
 @PropertySource(value = { "classpath:app.properties" })
-// @EnableMethodSecurity(securedEnabled = true, prePostEnabled = true)
 public class Backendf1Application {
 
 	public static void main(String[] args) {
@@ -47,25 +46,6 @@ public class Backendf1Application {
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
-
-	// @Bean
-    // public Jackson2ObjectMapperBuilderCustomizer jackson2ObjectMapperBuilderCustomizer() {
-        
-    //     return builder -> {
-            
-    //         // formatter
-    //         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    //         DateTimeFormatter dateTimeFormatter =  DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            
-    //         // deserializers
-    //         builder.deserializers(new LocalDateDeserializer(dateFormatter));
-    //         builder.deserializers(new LocalDateTimeDeserializer(dateTimeFormatter));
-            
-    //         // serializers
-    //         builder.serializers(new LocalDateSerializer(dateFormatter));
-    //         builder.serializers(new LocalDateTimeSerializer(dateTimeFormatter));
-    //     };
-    // }
 
 
 }

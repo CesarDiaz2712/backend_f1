@@ -6,6 +6,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import jakarta.persistence.Column;
@@ -16,6 +18,9 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
@@ -32,9 +37,12 @@ public class UserApp extends AbstractPersistableCustom<Long>{
     private String name;
 
     @Column(name = "username", columnDefinition = "varchar(20)", unique = true)
+    @NotBlank
     private String username;
-
+    
     @Column(name = "password")
+    @Size(min = 5, max = 20)
+    @NotBlank
     private String password;
 
     @Column(name= "date_created")
@@ -43,9 +51,13 @@ public class UserApp extends AbstractPersistableCustom<Long>{
     @Column(name= "date_updated")
     private LocalDate dateUpdated;
 
+    // @JsonIgnoreProperties({"users", "handler", "hibernateLazyInitializer"})
     @ManyToMany(fetch = FetchType.LAZY)
    	@JoinTable(name = "role_user_app", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<Role>();
+
+    @Transient
+    private Role newRole;
 
     public UserApp(String name, String username, String password, Set<Role> roles) {
         this.name = name;
@@ -104,6 +116,14 @@ public class UserApp extends AbstractPersistableCustom<Long>{
 
     public void setDateUpdated(LocalDate dateUpdated) {
         this.dateUpdated = dateUpdated;
+    }
+
+    public Role getNewRole() {
+        return newRole;
+    }
+
+    public void setNewRole(Role newRole) {
+        this.newRole = newRole;
     }
 
     
