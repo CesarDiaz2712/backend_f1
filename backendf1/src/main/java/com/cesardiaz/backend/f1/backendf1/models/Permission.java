@@ -2,11 +2,11 @@ package com.cesardiaz.backend.f1.backendf1.models;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -16,13 +16,19 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @NamedQuery(name = "Permission.findAll", query = "SELECT p FROM Permission p")
 @Table(name = "permission_system")
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
+@Setter
+@Builder
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Permission extends AbstractPersistableCustom<Long>{
 
@@ -37,31 +43,13 @@ public class Permission extends AbstractPersistableCustom<Long>{
 
     @ManyToMany(fetch = FetchType.LAZY)
    	@JoinTable(name = "role_permission_system", joinColumns = @JoinColumn(name = "permission_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
-    private Collection<Role> roles = new HashSet<Role>();
+    private Collection<Role> roles;
 
-    public String getCode() {
-        return code;
+    @PostConstruct
+    public void init(){
+        roles =new HashSet<Role>();
     }
 
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public String getEntityName() {
-        return entityName;
-    }
-
-    public void setEntityName(String entityName) {
-        this.entityName = entityName;
-    }
-
-    public String getActionName() {
-        return actionName;
-    }
-
-    public void setActionName(String actionName) {
-        this.actionName = actionName;
-    }
 
     
 }

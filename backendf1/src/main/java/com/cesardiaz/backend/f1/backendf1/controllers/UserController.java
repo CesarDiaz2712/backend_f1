@@ -3,8 +3,11 @@ package com.cesardiaz.backend.f1.backendf1.controllers;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cesardiaz.backend.f1.backendf1.core.advice.ApiResponseError;
+import com.cesardiaz.backend.f1.backendf1.dtos.ResetPasswordData;
 import com.cesardiaz.backend.f1.backendf1.dtos.UserAppDTO;
 import com.cesardiaz.backend.f1.backendf1.services.UserService;
+import com.cesardiaz.backend.f1.backendf1.utils.ResponseEntityCustom;
 import com.google.common.base.Preconditions;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,10 +16,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 
@@ -34,30 +40,46 @@ public class UserController {
 
     @PostMapping("/user")
 	@Operation(summary = "Create new user", description = "This endpoint creates a new user. If does not exist")
-    public ResponseEntity<String> post(@RequestBody(required = true) Map<String, String> requestMap) {
-        //TODO: process POST request
-        
-        if(requestMap==null){
-            return ResponseEntity.badRequest().build();
-        }
+    public UserAppDTO post(@RequestBody(required = true) UserAppDTO userAppDTO) {
 
-        ResponseEntity<String> response = userService.signUp(requestMap);
+        Preconditions.checkNotNull(userAppDTO);
+
+        return userService.createUser(userAppDTO);
         
-        return response;
+    }
+    
+    @SuppressWarnings("static-access")
+    @PostMapping("/user/{userId}/resetpassword")
+    @PostAuthorize("hasAuthority('ROLE_ADMIN')")
+	@Operation(summary = "Create new user", description = "This endpoint creates a new user. If does not exist")
+    public ResponseEntity<ResponseEntityCustom> resetPassword(@RequestBody(required = true) ResetPasswordData resetPasswordData, @PathVariable(value = "userId", required = true) Long userId) {
+
+        Preconditions.checkNotNull(resetPasswordData);
+        userService.resetPassword(userId, resetPasswordData);;
+        return ResponseEntityCustom.getResponseEntity("Contraseña cambiada", HttpStatus.CREATED).ok().build();
+        
     }
 
-    @GetMapping("/user/{id}")
+    
+    @PutMapping("/user/{userId}")
+	@Operation(summary = "Create new user", description = "This endpoint creates a new user. If does not exist")
+    public UserAppDTO put(@RequestBody(required = true) UserAppDTO userAppDTO, @PathVariable(value = "userId", required = true) Long userId) {
+
+        Preconditions.checkNotNull(userAppDTO);
+        Preconditions.checkNotNull(userId);
+
+        userAppDTO.setId(userId);
+        return userService.updateUser(userAppDTO);
+        
+    }
+
+    @GetMapping("/user/{userId}")
 	@Operation(summary = "Get a user by id", description = "This endpoint find a user by id.")
-    public ResponseEntity<UserAppDTO> get(@PathVariable(value = "id") Optional<Long> id) {
-        //TODO: process POST request
+    public UserAppDTO get(@PathVariable(value = "userId", required = true) Long userId) {
 
-        Preconditions.checkNotNull(id);
+        Preconditions.checkNotNull(userId);
 
-        if(id.isEmpty()){
-            return ResponseEntity.badRequest().build();
-        }
-
-        return  this.userService.findUserById(id.get());
+        return  this.userService.findUserById(userId);
     }
     
 }

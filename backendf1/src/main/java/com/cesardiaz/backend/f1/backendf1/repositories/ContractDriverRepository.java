@@ -12,8 +12,8 @@ import com.cesardiaz.backend.f1.backendf1.models.ContractDriverKey;
 
 public interface ContractDriverRepository extends JpaRepository<ContractDriver, ContractDriverKey>{
     
-    Optional<ContractDriver> findContractDriverByContractDriverKeyAndStatus(@Param("contractDriverKey") ContractDriverKey key, @Param("status") Boolean status);
+    Optional<ContractDriver> findContractDriverByContractDriverKeyAndIsActived(@Param("contractDriverKey") ContractDriverKey key, @Param("isActived") Boolean isActived);
 
-    @Query(value = "Select cd.race_driver_id, cd.team_id, cd.status, cd.date_initial_contract , cd.date_end_contract , cd.date_created, cd.date_updated  FROM contract_driver cd WHERE cd.status = true ", nativeQuery = true)
+    @Query(value = "Select cd.race_driver_id, cd.team_id, cd.status, cd.date_initial_contract , cd.date_end_contract , cd.date_created, cd.date_updated  FROM contract_driver cd WHERE cd.is_actived = true ", nativeQuery = true)
     List<ContractDriver> findAllContractByTeamActivated();
 }

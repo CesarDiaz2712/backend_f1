@@ -35,7 +35,6 @@ public class ContractDriverServiceImp implements ContractDriverService{
 
     @Override
     public ResponseEntity<String> assignContractToDriver(Map<String, String> requestMap, Long driverId) {
-        // TODO Auto-generated method stub
 
         if(requestMap!=null && contractValidationRequest.validateParamsToCreate(requestMap) && driverId != null){
             ContractDriver contractDriver = getContractDriverFromRequestMap(requestMap, driverId);
@@ -51,7 +50,7 @@ public class ContractDriverServiceImp implements ContractDriverService{
             }
 
             ContractDriverKey key = new ContractDriverKey( driverId, contractDriver.getTeam().getId());
-            Optional<ContractDriver> optionalcontract = contractDriverRepository.findContractDriverByContractDriverKeyAndStatus(key,true);
+            Optional<ContractDriver> optionalcontract = contractDriverRepository.findContractDriverByContractDriverKeyAndIsActived(key,true);
  
             if(optionalcontract.isPresent()){
                 return ResponseEntityCustom.getResponseEntity(MessageCustom.DATA_ALREADY_CREATED, HttpStatus.CONFLICT);
@@ -93,12 +92,12 @@ public class ContractDriverServiceImp implements ContractDriverService{
         if(driverId != null && teamId != null){
 
             ContractDriverKey key = new ContractDriverKey( driverId, teamId);
-            Optional<ContractDriver> optionalContract = contractDriverRepository.findContractDriverByContractDriverKeyAndStatus(key,true);
+            Optional<ContractDriver> optionalContract = contractDriverRepository.findContractDriverByContractDriverKeyAndIsActived(key,true);
             
             if(optionalContract.isPresent()){
                 ContractDriver contractDriver = optionalContract.get();
                 contractDriver.setDateUpdated(new Date());
-                contractDriver.setStatus(false);
+                contractDriver.setActived(false);
                 return ResponseEntity.ok().build();
             }else{
                 return ResponseEntity.notFound().build();

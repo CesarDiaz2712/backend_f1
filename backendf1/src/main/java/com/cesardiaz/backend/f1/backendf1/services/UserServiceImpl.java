@@ -1,188 +1,161 @@
 package com.cesardiaz.backend.f1.backendf1.services;
 
-import java.time.LocalDate;
-import java.util.Map;
+import java.util.Date;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.cesardiaz.backend.f1.backendf1.components.UserConverterDto;
-import com.cesardiaz.backend.f1.backendf1.constans.MessageCustom;
+import com.cesardiaz.backend.f1.backendf1.core.advice.BadRequestCustomException;
+import com.cesardiaz.backend.f1.backendf1.core.advice.ResourceNotFoundException;
+import com.cesardiaz.backend.f1.backendf1.core.constants.ErrorKeyEnum;
+import com.cesardiaz.backend.f1.backendf1.dtos.DetailsUserData;
+import com.cesardiaz.backend.f1.backendf1.dtos.ResetPasswordData;
 import com.cesardiaz.backend.f1.backendf1.dtos.UserAppDTO;
-import com.cesardiaz.backend.f1.backendf1.models.Role;
+import com.cesardiaz.backend.f1.backendf1.models.ResetPasswordEntity;
 import com.cesardiaz.backend.f1.backendf1.models.UserApp;
+import com.cesardiaz.backend.f1.backendf1.repositories.ResetPasswordRepository;
 import com.cesardiaz.backend.f1.backendf1.repositories.RoleRepository;
 import com.cesardiaz.backend.f1.backendf1.repositories.UserRepository;
-import com.cesardiaz.backend.f1.backendf1.utils.ResponseEntityCustom;
 import com.cesardiaz.backend.f1.backendf1.utils.validation.UserAppValidationRequest;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.transaction.Transactional;
 
 @Service
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserConverterDto userConverterDto;
     private final PasswordEncoder passwordEncoder;
     private final UserAppValidationRequest appValidationForm;
     private final RoleRepository roleRepository;
-    
-    @Autowired
-    public UserServiceImpl(UserRepository userRepository, UserConverterDto userConverterDto, PasswordEncoder passwordEncoder, UserAppValidationRequest appValidationForm, RoleRepository roleRepository) {
+    private final ResetPasswordRepository resetPasswordRepository;
+
+    public UserServiceImpl(UserRepository userRepository, UserConverterDto userConverterDto,
+            PasswordEncoder passwordEncoder, UserAppValidationRequest appValidationForm,
+            RoleRepository roleRepository, ResetPasswordRepository resetPasswordRepository) {
         this.userRepository = userRepository;
         this.userConverterDto = userConverterDto;
         this.passwordEncoder = passwordEncoder;
         this.appValidationForm = appValidationForm;
         this.roleRepository = roleRepository;
+        this.resetPasswordRepository = resetPasswordRepository;
+    }
+
+    @Override
+    @Transactional
+    public UserAppDTO updateUser(UserAppDTO userAppDTO) {
+
+        if (userAppDTO.getId() == null)
+            throw new NullPointerException();
+
+        Optional<UserApp> userOptional = userRepository.findById(userAppDTO.getId());
+
+        if (!userOptional.isPresent()) {
+            throw new ResourceNotFoundException(ErrorKeyEnum.NOT_FOUND);
+        }
+
+        UserApp userApp = userOptional.get();
+
+        return userConverterDto.convertEntityToDto(userApp.updateInfoUser(userAppDTO));
+
+    }
+
+    @Override
+    public UserAppDTO findUserById(Long id) {
+
+        if (id == null) {
+            throw new NullPointerException();
+        }
+
+        Optional<UserApp> userOptional = this.userRepository.findById(id);
+
+        if (!userOptional.isPresent())
+            throw new ResourceNotFoundException(ErrorKeyEnum.NOT_FOUND);
+
+        return this.userConverterDto.convertEntityToDto(userOptional.get());
+
     }
 
     @Override
     public UserAppDTO createUser(UserAppDTO userAppDTO) {
-        // TODO Auto-generated method stub
 
-        UserApp user = this.userRepository.save(userConverterDto.convertDtoToEntity(userAppDTO));
-        return this.userConverterDto.convertEntityToDto(user);
+        appValidationForm.validateParamsToCreateUser(userAppDTO);
+        Optional<UserApp> userAppOptinal = userRepository.findByUsername(userAppDTO.getUsername());
+
+        if (!userAppOptinal.isPresent()) {
+            UserApp user = userConverterDto.convertDtoToEntity(userAppDTO);
+            user.setPassword(passwordEncoder.encode(userAppDTO.getPassword()));
+
+            user.setDateCreated(new Date());
+
+            userRepository.save(user);
+
+            return userConverterDto.convertEntityToDto(user);
+        } else {
+            throw new BadRequestCustomException(ErrorKeyEnum.DATA_DUPLICATED, null);
+        }
+
     }
 
     @Override
-    public ResponseEntity<?> updateUser(Map<String,String> requestMap) {
-        // TODO Auto-generated method stub
+    @Transactional
+    public void resetPassword(Long userId, ResetPasswordData resetPasswordData) {
 
-        if(appValidationForm.validateIdMap(requestMap)){
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		
+        if (userId == null)
+            throw new NullPointerException();
 
-            try {
-                
-            Optional<UserApp> userOptional  = userRepository.findById(Long.parseLong(requestMap.get("id")));
+        appValidationForm.validateParamsToResetPassword(resetPasswordData);
 
-            if(!userOptional.isPresent()){
-                return ResponseEntity.notFound().build();
-            }
+        Optional<UserApp> userOptional = userRepository.findById(userId);
 
-            UserApp user = userOptional.get();
-            boolean flag= false;
-
-            if(requestMap.containsKey("username") && requestMap.get("username")!=null){
-                user.setUsername(requestMap.get("username"));
-                flag = true;
-            }
-
-            if(requestMap.containsKey("password") && requestMap.get("password")!=null){
-                user.setUsername(passwordEncoder.encode(requestMap.get("password")));
-                flag = true;
-            }
-
-            if(flag){
-                user.setDateUpdated(LocalDate.now());
-                return ResponseEntityCustom.getResponseEntity("User updated", HttpStatus.OK);
-            }
-
-            return ResponseEntity.badRequest().build();
-            } catch (Exception e) {
-                // TODO: handle exception
-                e.printStackTrace();
-            }
-            return ResponseEntity.internalServerError().build();
-        }else{
-            return ResponseEntity.badRequest().build();
+        if (!userOptional.isPresent()) {
+            throw new ResourceNotFoundException(ErrorKeyEnum.NOT_FOUND);
         }
+
+        UserApp userApp = userOptional.get();
+
+        if (!passwordEncoder.matches( resetPasswordData.getOldPassword(), userApp.getPassword()))
+            throw new BadRequestCustomException(ErrorKeyEnum.RESET_PASSWORD_VALIDATION, null);
+
+        if (passwordEncoder.matches(resetPasswordData.getNewPassword(), userApp.getPassword()))
+            throw new BadRequestCustomException(ErrorKeyEnum.RESET_PASSWORD_SIMILAR, null);
+
+        String oldPasswordEncode = passwordEncoder.encode(resetPasswordData.getOldPassword());
+        String newPasswordEncode = passwordEncoder.encode(resetPasswordData.getNewPassword());
+        userApp.setPassword(newPasswordEncode);
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        DetailsUserData detailsUserData = mapper.convertValue(authentication.getDetails(), DetailsUserData.class);
+
+        ResetPasswordEntity resetPasswordEntity = new ResetPasswordEntity(detailsUserData.getUserId(), new Date(), userApp, oldPasswordEncode,
+                newPasswordEncode);
+        resetPasswordRepository.save(resetPasswordEntity);
+
+        // sendNotification to email.
     }
 
     @Override
-    public ResponseEntity<UserAppDTO> findUserById(Long id) {
-        // TODO Auto-generated method stub
-
-        if(id == null){
-            return ResponseEntity.badRequest().build();
-        }
-
-        try {
-         
-
-        Optional<UserApp> userOptional = this.userRepository.findById(id);
-
-        if(!userOptional.isPresent())
-            return ResponseEntity.notFound().build();
-
-
-        return ResponseEntity.ok().body(this.userConverterDto.convertEntityToDto(userOptional.get()));   
+    public UserAppDTO findUserByUsernamePassword(String username) {
         
-        } catch (Exception e) {
-            // TODO: handle exception
-               e.printStackTrace();
-        }
-        return ResponseEntity.internalServerError().build();   
- 
-    }
-
-    @Override
-    public ResponseEntity<String> signUp(Map<String, String> requestMap) {
-        // TODO Auto-generated method stub
-
-        try {
-            if(appValidationForm.validateSignUpMap(requestMap)){
-                Optional<UserApp> userApp = userRepository.findByUsername(requestMap.get("username"));
-                if(!userApp.isPresent()){
-                    UserApp user = getUserFromMap(requestMap);
-                    Optional<Role> optionalRole = roleRepository.findById(user.getNewRole().getId());
-
-                    if(optionalRole.isPresent()){
-                        user.setRole(optionalRole.get());
-                    }else{
-                        return ResponseEntity.badRequest().build();
-                    }
-
-                    userRepository.save(user);
-
-                    return ResponseEntityCustom.getResponseEntity("Usuario registrado", HttpStatus.CREATED);
-                }else{
-                    
-                    return ResponseEntityCustom.getResponseEntity("Usuario existente", HttpStatus.BAD_REQUEST);
-                }
-            }else{
-                return ResponseEntityCustom.getResponseEntity(MessageCustom.INVALID_DATA, HttpStatus.BAD_REQUEST); 
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (username == null) {
+            throw new NullPointerException();
         }
 
-        return ResponseEntityCustom.getResponseEntity(MessageCustom.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
+        Optional<UserApp> userOptional = this.userRepository.findByUsername(username);
+
+        if (!userOptional.isPresent())
+            throw new ResourceNotFoundException(ErrorKeyEnum.NOT_FOUND);
+
+        return this.userConverterDto.convertEntityToDto(userOptional.get());
+
     }
 
-    // private boolean validateSignUpMap(Map<String, String> requestMap){
-
-    //     if(requestMap.containsKey("name") && requestMap.containsKey("username") && requestMap.containsKey("password")
-    //     && requestMap.containsKey("role")){
-    //         return true;
-    //     }else
-    //     return false;
-    // }
-
-    private UserApp getUserFromMap(Map<String, String> requestMap){
-
-        if(requestMap!=null){
-
-            String idRole = requestMap.get("role");
-
-            Long idRoleLong= null;
-            try {
-                idRoleLong = Long.parseLong(idRole);
-            } catch (Exception e) {
-                // TODO: handle exception
-            }
-
-            UserApp userApp = new UserApp();
-            userApp.setUsername(requestMap.get("username"));
-            userApp.setPassword(passwordEncoder.encode(requestMap.get("password")));
-            userApp.setName(requestMap.get("name"));
-            userApp.setDateCreated(LocalDate.now());
-            userApp.setNewRole(new Role(idRoleLong));
-            
-            return userApp;
-        }else{
-            throw new NullPointerException("RequestMap is null" + requestMap);
-        }
-    }
-    
 }

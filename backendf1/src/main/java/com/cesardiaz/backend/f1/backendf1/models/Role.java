@@ -2,11 +2,11 @@ package com.cesardiaz.backend.f1.backendf1.models;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -16,13 +16,19 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @NamedQuery(name = "Role.findAll", query = "SELECT dr FROM Role dr")
 @Table(name = "role")
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
+@Setter
+@Builder
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Role extends AbstractPersistableCustom<Long>{
     
@@ -36,13 +42,19 @@ public class Role extends AbstractPersistableCustom<Long>{
         // @JsonIgnoreProperties(value = "users")
     @ManyToMany(fetch = FetchType.LAZY)
    	@JoinTable(name = "role_user_app", joinColumns = @JoinColumn(name = "role_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
-    private Collection<Role> users = new HashSet<Role>();
+    private Collection<UserApp> users;
     
     @ManyToMany(fetch = FetchType.LAZY)
    	@JoinTable(name = "role_permission_system", joinColumns = @JoinColumn(name = "role_id"), inverseJoinColumns = @JoinColumn(name = "permission_id"))
-    private Collection<Permission> permission = new HashSet<Permission>();
+    private Collection<Permission> permission;
 
     
+    @PostConstruct
+    public void init(){
+        users =new HashSet<UserApp>();
+        permission =new HashSet<Permission>();
+    }
+
     public Role(Long id) {
         setId(id);
     }
@@ -51,38 +63,6 @@ public class Role extends AbstractPersistableCustom<Long>{
         setId(id);
         this.name = authority;
         this.description = description;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String authority) {
-        this.name = authority;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public Collection<Role> getUsers() {
-        return users;
-    }
-
-    public void setUsers(Collection<Role> users) {
-        this.users = users;
-    }
-
-    public Collection<Permission> getPermission() {
-        return permission;
-    }
-
-    public void setPermission(Collection<Permission> permission) {
-        this.permission = permission;
     }
 
     

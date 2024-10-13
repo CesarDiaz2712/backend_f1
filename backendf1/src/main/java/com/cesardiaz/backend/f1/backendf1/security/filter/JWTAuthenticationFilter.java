@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -14,7 +15,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.cesardiaz.backend.f1.backendf1.dtos.UserAppDTO;
 import com.cesardiaz.backend.f1.backendf1.models.UserApp;
+import com.cesardiaz.backend.f1.backendf1.services.UserService;
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,8 +34,10 @@ import static com.cesardiaz.backend.f1.backendf1.security.TokenJwtConfig.*;
 public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private AuthenticationManager authenticationManager;
+    private final UserService userService;
 
-    public JWTAuthenticationFilter(AuthenticationManager authenticationManager) {
+    public JWTAuthenticationFilter(AuthenticationManager authenticationManager, UserService userService) {
+        this.userService = userService;
         this.authenticationManager = authenticationManager;
     }
 
@@ -75,10 +80,15 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
         Collection<? extends GrantedAuthority> roles = authResult.getAuthorities();
 
+        UserAppDTO userApp = userService.findUserByUsernamePassword(username);
+
         Claims claims = Jwts.claims()
                 .add("authorities", new ObjectMapper().writeValueAsString(roles))
                 .add("username", username)
+                .add("clientId", userApp.getId())
                 .build();
+
+        // Map<String, Object> map = new MapSer;
 
         String jwt = Jwts.builder()
                 .subject(username)

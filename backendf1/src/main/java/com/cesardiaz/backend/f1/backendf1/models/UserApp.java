@@ -1,15 +1,15 @@
 package com.cesardiaz.backend.f1.backendf1.models;
 
 
-import java.time.LocalDate;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.cesardiaz.backend.f1.backendf1.dtos.UserAppDTO;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -20,49 +20,62 @@ import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "user_app")
 @NoArgsConstructor
+@Getter
+@Setter
 @AllArgsConstructor
+@Builder
 @NamedQuery(name = "UserApp.findAll", query = "SELECT u FROM UserApp u")
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class UserApp extends AbstractPersistableCustom<Long>{
 
 
-    @Column(name = "name", columnDefinition = "varchar(20)")
-    private String name;
+    @Column(name = "firstname", columnDefinition = "varchar(45)", nullable = false)
+    @NotBlank
+    private String firstname;
 
-    @Column(name = "username", columnDefinition = "varchar(20)", unique = true)
+    @Column(name = "lastname", columnDefinition = "varchar(45)", nullable = false)
+    @NotBlank
+    private String lastname;
+
+    @Column(name = "username", columnDefinition = "varchar(20)", unique = true, nullable = false)
     @NotBlank
     private String username;
     
-    @Column(name = "password")
-    @Size(min = 5, max = 20)
+    @Column(name = "password", nullable = false)
     @NotBlank
     private String password;
 
-    @Column(name= "date_created")
-    private LocalDate dateCreated;
+    @Column(name= "date_created", nullable = false)
+    private Date dateCreated;
     
     @Column(name= "date_updated")
-    private LocalDate dateUpdated;
+    private Date dateUpdated;
 
-    // @JsonIgnoreProperties({"users", "handler", "hibernateLazyInitializer"})
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
    	@JoinTable(name = "role_user_app", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
-    private Set<Role> roles = new HashSet<Role>();
+    private Set<Role> roles;
 
     @Transient
     private Role newRole;
 
-    public UserApp(String name, String username, String password, Set<Role> roles) {
-        this.name = name;
+    @PostConstruct
+    public void init(){
+        roles =new HashSet<Role>();
+    }
+
+    public UserApp(String name, String username, String lastname, Set<Role> roles) {
+        this.firstname = name;
         this.username = username;
-        this.password = password;
+        this.lastname = lastname;
         this.roles = roles;
     }
 
@@ -70,61 +83,21 @@ public class UserApp extends AbstractPersistableCustom<Long>{
         setId(id);
     }
 
-    public String getName() {
-        return name;
-    }
+    public UserApp updateInfoUser(UserAppDTO userAppDTO){
 
-    public void setName(String name) {
-        this.name = name;
-    }
+        if (userAppDTO.getUsername() != null && !userAppDTO.getUsername().equals(this.username)) {
+            setUsername(userAppDTO.getUsername());
+        }
 
-    public String getUsername() {
-        return username;
+        if (userAppDTO.getFirstname() != null && !userAppDTO.getFirstname().equals(firstname)) {
+            setFirstname(userAppDTO.getFirstname());;
+        }
+        
+        if (userAppDTO.getLastname() != null && !userAppDTO.getLastname().equals(lastname)) {
+            setLastname(userAppDTO.getLastname());;
+        }
+        
+        return this;
     }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public Set<Role> getRoles() {
-        return roles;
-    }
-
-    public void setRole(Role role) {
-        this.roles.add(role);
-    }
-
-    public LocalDate getDateCreated() {
-        return dateCreated;
-    }
-
-    public void setDateCreated(LocalDate dateCreated) {
-        this.dateCreated = dateCreated;
-    }
-
-    public LocalDate getDateUpdated() {
-        return dateUpdated;
-    }
-
-    public void setDateUpdated(LocalDate dateUpdated) {
-        this.dateUpdated = dateUpdated;
-    }
-
-    public Role getNewRole() {
-        return newRole;
-    }
-
-    public void setNewRole(Role newRole) {
-        this.newRole = newRole;
-    }
-
     
 }

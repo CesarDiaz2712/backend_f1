@@ -15,26 +15,28 @@ import com.cesardiaz.backend.f1.backendf1.models.UserApp;
 @Component
 public class UserConverterDto {
 
-    public UserAppDTO convertEntityToDto(UserApp userApp){
+    public UserAppDTO convertEntityToDto(UserApp userApp) {
 
-        Collection<RoleDTO> rolesDto= new ArrayList<>();
-        if(userApp.getRoles()!=null && userApp.getRoles().size()>0){
-            for(Role role : userApp.getRoles()){
+        Collection<RoleDTO> rolesDto = new ArrayList<>();
+        if (userApp.getRoles() != null && !userApp.getRoles().isEmpty()) {
+            for (Role role : userApp.getRoles()) {
                 rolesDto.add(new RoleDTO(role.getId(), role.getName(), role.getDescription()));
             }
         }
 
-        return new UserAppDTO(userApp.getId(), userApp.getName(), userApp.getUsername(), userApp.getDateCreated().toString(),userApp.getDateUpdated()!=null?userApp.getDateUpdated().toString():null, rolesDto);
+        return new UserAppDTO(userApp.getId(), userApp.getFirstname(), userApp.getLastname(), userApp.getUsername(),
+                userApp.getPassword(), userApp.getDateCreated(),
+                userApp.getDateUpdated() != null ? userApp.getDateUpdated() : null, rolesDto);
     }
 
-    public UserApp convertDtoToEntity(UserAppDTO userAppDTO){
-        Set<Role> roles= new HashSet<Role>();
-        if(userAppDTO.getRoles()!=null && userAppDTO.getRoles().size()>0){
-            for(RoleDTO roleDto : userAppDTO.getRoles()){
+    public UserApp convertDtoToEntity(UserAppDTO userAppDTO) {
+        Set<Role> roles = new HashSet<Role>();
+        if (userAppDTO.getRoles() != null && userAppDTO.getRoles().size() > 0) {
+            for (RoleDTO roleDto : userAppDTO.getRoles()) {
                 roles.add(new Role(roleDto.getId(), roleDto.getAuthority(), roleDto.getDescription()));
             }
         }
 
-        return new UserApp(userAppDTO.getName(), userAppDTO.getUsername(), userAppDTO.getPassword(), roles);
+        return new UserApp(userAppDTO.getFirstname(), userAppDTO.getUsername(), userAppDTO.getLastname(), roles);
     }
 }
