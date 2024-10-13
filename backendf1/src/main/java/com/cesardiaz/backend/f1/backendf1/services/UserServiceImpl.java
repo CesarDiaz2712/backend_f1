@@ -16,9 +16,9 @@ import com.cesardiaz.backend.f1.backendf1.dtos.DetailsUserData;
 import com.cesardiaz.backend.f1.backendf1.dtos.ResetPasswordData;
 import com.cesardiaz.backend.f1.backendf1.dtos.UserAppDTO;
 import com.cesardiaz.backend.f1.backendf1.models.ResetPasswordEntity;
+import com.cesardiaz.backend.f1.backendf1.models.Role;
 import com.cesardiaz.backend.f1.backendf1.models.UserApp;
 import com.cesardiaz.backend.f1.backendf1.repositories.ResetPasswordRepository;
-import com.cesardiaz.backend.f1.backendf1.repositories.RoleRepository;
 import com.cesardiaz.backend.f1.backendf1.repositories.UserRepository;
 import com.cesardiaz.backend.f1.backendf1.utils.validation.UserAppValidationRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,17 +32,14 @@ public class UserServiceImpl implements UserService {
     private final UserConverterDto userConverterDto;
     private final PasswordEncoder passwordEncoder;
     private final UserAppValidationRequest appValidationForm;
-    private final RoleRepository roleRepository;
     private final ResetPasswordRepository resetPasswordRepository;
 
     public UserServiceImpl(UserRepository userRepository, UserConverterDto userConverterDto,
-            PasswordEncoder passwordEncoder, UserAppValidationRequest appValidationForm,
-            RoleRepository roleRepository, ResetPasswordRepository resetPasswordRepository) {
+            PasswordEncoder passwordEncoder, UserAppValidationRequest appValidationForm, ResetPasswordRepository resetPasswordRepository) {
         this.userRepository = userRepository;
         this.userConverterDto = userConverterDto;
         this.passwordEncoder = passwordEncoder;
         this.appValidationForm = appValidationForm;
-        this.roleRepository = roleRepository;
         this.resetPasswordRepository = resetPasswordRepository;
     }
 
@@ -90,6 +87,10 @@ public class UserServiceImpl implements UserService {
         if (!userAppOptinal.isPresent()) {
             UserApp user = userConverterDto.convertDtoToEntity(userAppDTO);
             user.setPassword(passwordEncoder.encode(userAppDTO.getPassword()));
+
+            for (Role role : user.getRoles()) {
+                user.addNewRole(role);
+            }
 
             user.setDateCreated(new Date());
 

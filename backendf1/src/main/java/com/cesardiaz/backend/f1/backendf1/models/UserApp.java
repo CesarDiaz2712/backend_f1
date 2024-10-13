@@ -99,5 +99,9 @@ public class UserApp extends AbstractPersistableCustom<Long>{
         
         return this;
     }
+
+    public void addNewRole(Role role){
+        roles.add(role);
+    }
     
 }

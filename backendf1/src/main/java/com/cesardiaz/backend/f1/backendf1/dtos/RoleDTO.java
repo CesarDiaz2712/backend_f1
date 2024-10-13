@@ -1,5 +1,10 @@
 package com.cesardiaz.backend.f1.backendf1.dtos;
 
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor
+@Builder
 public class RoleDTO {
     private Long id;
     
