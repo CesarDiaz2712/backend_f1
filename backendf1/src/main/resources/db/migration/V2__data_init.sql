@@ -8,3 +8,9 @@ INSERT INTO `user_app` (`firstname`, `lastname`, `username`, `password`, `date_c
 
 INSERT INTO `role_permission_system` (`permission_id`, `role_id`) VALUES ('1', '1');
 INSERT INTO `role_user_app` (`user_id`, `role_id`) VALUES ('1', '1');
+
+INSERT INTO `permission_system` (`code`, `entity_name`, `action_name`) VALUES ('GET_USER', 'USER', 'GET');
+INSERT INTO `permission_system` (`code`, `entity_name`, `action_name`) VALUES ('UPDATE_USER', 'USER', 'UPDATE');
+INSERT INTO `permission_system` (`code`, `entity_name`, `action_name`) VALUES ('CHANGE_PASSWORD', 'USER', 'CHANGE');
+
+

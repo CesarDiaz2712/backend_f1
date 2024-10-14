@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -44,7 +43,6 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException {
-        // TODO Auto-generated method stub
 
         UserApp user = null;
         String username = null;
@@ -55,13 +53,10 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
             username = user.getUsername();
             password = user.getPassword();
         } catch (StreamReadException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (DatabindException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
@@ -73,7 +68,6 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
             Authentication authResult) throws IOException, ServletException {
-        // TODO Auto-generated method stub
 
         User user = (User) authResult.getPrincipal();
         String username = user.getUsername();
@@ -87,9 +81,6 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .add("username", username)
                 .add("clientId", userApp.getId())
                 .build();
-
-        // Map<String, Object> map = new MapSer;
-
         String jwt = Jwts.builder()
                 .subject(username)
                 .claims(claims)
@@ -115,7 +106,6 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
             AuthenticationException failed) throws IOException, ServletException {
-        // TODO Auto-generated method stub
 
         Map<String, String> map = new HashMap<>();
         map.put("message", "Error en la authenticacion, username o password incorrectos!");
