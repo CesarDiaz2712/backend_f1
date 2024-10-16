@@ -13,7 +13,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.annotation.Rollback;
 
 import com.cesardiaz.backend.f1.backendf1.models.TeamFormulaOne;
-import com.cesardiaz.backend.f1.backendf1.projections.TeamView;
 import com.cesardiaz.backend.f1.backendf1.repositories.TeamRepository;
 
 @DataJpaTest
@@ -41,13 +40,13 @@ public class TeamRepositoryTest {
     
     @Test
     public void findTeamByAproximationSuccess(){
-        Optional<TeamView> teamOptional = teamRepository.findTeamByAproximation("Aston");
+        Optional<TeamFormulaOne> teamOptional = teamRepository.findByName("Aston");
         assertThat(teamOptional).isPresent().isNotNull();
     }
 
     @Test
     public void findTeamByAproximationUnsuccess(){
-        Optional<TeamView> teamOptional = teamRepository.findTeamByAproximation("Hass");
+        Optional<TeamFormulaOne> teamOptional = teamRepository.findByName("Hass");
         assertThat(teamOptional).isNotPresent();
     }
 

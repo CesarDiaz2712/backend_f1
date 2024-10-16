@@ -1,28 +1,24 @@
 package com.cesardiaz.backend.f1.backendf1.services;
 
 import java.util.Date;
-import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.cesardiaz.backend.f1.backendf1.components.TeamConvertDTO;
-import com.cesardiaz.backend.f1.backendf1.constans.MessageCustom;
+import com.cesardiaz.backend.f1.backendf1.core.advice.BadRequestCustomException;
+import com.cesardiaz.backend.f1.backendf1.core.advice.ResourceNotFoundException;
+import com.cesardiaz.backend.f1.backendf1.core.constants.ErrorKeyEnum;
 import com.cesardiaz.backend.f1.backendf1.dtos.TeamDTO;
 import com.cesardiaz.backend.f1.backendf1.models.TeamFormulaOne;
 import com.cesardiaz.backend.f1.backendf1.projections.TeamView;
 import com.cesardiaz.backend.f1.backendf1.repositories.TeamRepository;
-import com.cesardiaz.backend.f1.backendf1.utils.ResponseEntityCustom;
 import com.cesardiaz.backend.f1.backendf1.utils.TeamCommandEnum;
-import com.cesardiaz.backend.f1.backendf1.utils.TeamEnum;
 import com.cesardiaz.backend.f1.backendf1.utils.validation.TeamValidationRequest;
 
-import jakarta.transaction.Transactional;
 
 @Service
 public class TeamServiceImp implements TeamService {
@@ -31,7 +27,8 @@ public class TeamServiceImp implements TeamService {
     private final TeamRepository teamRepository;
     private final TeamConvertDTO teamConvertDTO;
 
-    public TeamServiceImp(TeamValidationRequest teamValidationRequest, TeamRepository teamRepository, TeamConvertDTO teamConvertDTO) {
+    public TeamServiceImp(TeamValidationRequest teamValidationRequest, TeamRepository teamRepository,
+            TeamConvertDTO teamConvertDTO) {
         this.teamValidationRequest = teamValidationRequest;
         this.teamRepository = teamRepository;
         this.teamConvertDTO = teamConvertDTO;
@@ -39,96 +36,50 @@ public class TeamServiceImp implements TeamService {
     }
 
     @Override
-    @Transactional
-    public ResponseEntity<String> createTeamRace(Map<String, String> requestMap) {
-        // TODO Auto-generated method stub
+    public TeamDTO createTeamRace(TeamDTO teamDTO) {
 
-        if (teamValidationRequest.validateParamsToCreate(requestMap)) {
-            TeamFormulaOne team = getTeamFromMap(requestMap);
-            Optional<TeamView> teamExist = teamRepository.findTeamByAproximation(team.getName());
+        teamValidationRequest.validateParamsToCreate(teamDTO);
 
-            if(!teamExist.isPresent()){
-                team.setDateCreated(new Date());
-                teamRepository.save(team);
-                return ResponseEntity.ok().build();
-            }else{
-                return ResponseEntityCustom.getResponseEntity(MessageCustom.DATA_ALREADY_CREATED, HttpStatus.CONFLICT);
-            }
+        TeamFormulaOne team = teamConvertDTO.convertDtoToEntity(teamDTO);
 
-        } else {
-            return ResponseEntity.badRequest().build();
+        Optional<TeamFormulaOne> teamExist = teamRepository.findByName(team.getName());
+
+        if (teamExist.isPresent()) {
+            throw new BadRequestCustomException(ErrorKeyEnum.DATA_DUPLICATED);
         }
-    }
 
-    private String validateTeamName(Integer nameToCheck) {
+        team.setDateCreated(new Date());
 
-        if(nameToCheck.equals(TeamEnum.redbull.getId())){
-            return TeamEnum.redbull.getCode();
-        }else if(nameToCheck.equals(TeamEnum.mclaren.getId())){
-            return TeamEnum.mclaren.getCode();
-        }else if(nameToCheck.equals(TeamEnum.mercedes.getId())){
-            return TeamEnum.mercedes.getCode();
-        }else{
-            throw new RuntimeException("Error with team name");
-        }
-    }
+        teamRepository.save(team);
 
-    private TeamFormulaOne  getTeamFromMap(Map<String, String> requestMap){
+        return teamConvertDTO.convertEntityToDTO(team);
 
-        try {
-                
-            if(requestMap!=null){
-                
-                String teamId = requestMap.get("teamId");
-                Integer id = Integer.parseInt(teamId);
-
-                String nameTeam = validateTeamName(id);
-
-                TeamFormulaOne team =  new TeamFormulaOne(teamId!=null?Long.parseLong(teamId):null, nameTeam, requestMap.get("alias"),
-                requestMap.get("yearRegister"), requestMap.get("teamChief"), requestMap.get("technicalChief"), null, null);
-
-                return team;
-            }
-            return null;
-        } catch (Exception e) {
-            // TODO: handle exception
-            e.printStackTrace();
-            throw new RuntimeException("Internal Server Error");
-        }
     }
 
     @Override
-    public ResponseEntity<TeamDTO> getTeamById(Long teamId) {
-        // TODO Auto-generated method stub
+    public TeamDTO getTeamById(Long teamId) {
 
         Optional<TeamFormulaOne> teamOptional = teamRepository.findById(teamId);
 
-        if(teamOptional.isPresent()){
-            TeamFormulaOne team = teamOptional.get();
-
-            return ResponseEntity.ok().body(teamConvertDTO.convertEntityToDTO(team));
-        }else{
-
-            return ResponseEntity.notFound().build();
+        if (!teamOptional.isPresent()) {
+            throw new ResourceNotFoundException(ErrorKeyEnum.NOT_FOUND);
         }
+
+        return teamConvertDTO.convertEntityToDTO(teamOptional.get());
     }
 
     @Override
-    public ResponseEntity<Page<TeamView>> getTeams(TeamCommandEnum command, int page, int size) {
-        // TODO Auto-generated method stub
-        if(command != null){
+    public Page<TeamView> getTeams(TeamCommandEnum command, int page, int size) {
 
-            Page<TeamView> responsePage = null;
-            if(command.getCode().equals("all_teams")){
-                responsePage = teamRepository.findAllTeams(PageRequest.of(page, size, Sort.by("name")), false);
-            }else{
-                
-                responsePage = teamRepository.findAllTeams(PageRequest.of(page, size, Sort.by("name")), true);
-            }
+        if (command == null)
+            throw new BadRequestCustomException(ErrorKeyEnum.BAD_REQUEST);
 
-            return ResponseEntity.ok().body(responsePage);
+        if (command.equals(TeamCommandEnum.actual_teams)) {
+            return teamRepository.findAllTeams(PageRequest.of(page, size, Sort.by("name")), true);
         }
-        return ResponseEntity.internalServerError().build();
+
+        return teamRepository.findAllTeams(PageRequest.of(page, size, Sort.by("name")), false);
+
     }
 
 }

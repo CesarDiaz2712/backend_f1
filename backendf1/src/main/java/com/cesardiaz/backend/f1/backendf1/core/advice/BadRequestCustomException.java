@@ -8,6 +8,9 @@ public class BadRequestCustomException extends CustomException{
 
 	private static final HttpStatus httpStatus=HttpStatus.BAD_REQUEST;
 
+    public BadRequestCustomException(ErrorKeyEnum errorKeyEnum) {
+        super(errorKeyEnum, httpStatus);
+    }
     public BadRequestCustomException(ErrorKeyEnum errorKeyEnum, Object[] params) {
         super(errorKeyEnum, httpStatus, params);
     }

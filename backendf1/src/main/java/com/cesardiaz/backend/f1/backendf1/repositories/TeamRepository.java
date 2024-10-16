@@ -15,8 +15,8 @@ import com.cesardiaz.backend.f1.backendf1.projections.TeamView;
 @Repository
 public interface TeamRepository extends JpaRepository<TeamFormulaOne, Long>{
 
-    @Query(value = "SELECT t.id as id, t.name as name, t.alias as alias FROM team t WHERE name=:name", nativeQuery = true)
-    Optional<TeamView> findTeamByAproximation(@Param("name") String name);
+    @Query("SELECT t FROM TeamFormulaOne t WHERE t.name LIKE %:name%")
+    Optional<TeamFormulaOne> findByName(@Param("name") String name);
 
     @Query(value = "SELECT t.id as id, t.name as name, t.alias as alias FROM team t WHERE t.is_active= :isActive", nativeQuery = true)
     Page<TeamView> findAllTeams(Pageable pageable, boolean isActive);

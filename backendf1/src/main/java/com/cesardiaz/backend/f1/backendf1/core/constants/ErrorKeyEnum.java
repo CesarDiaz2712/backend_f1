@@ -7,6 +7,7 @@ import lombok.Getter;
 @Getter
 public enum ErrorKeyEnum {
 
+    BAD_REQUEST("error.msg.bad.request","El la peticion es incorrect."),
     // Recurso no encontrado
     NOT_FOUND("error.msg.not.found","El recurso solicitado no pudo ser encontrado."),
     NOT_FOUND_RESOURCE("error.msg.not.found.resource","No se pudo encontrar el recurso especificado: %s."),

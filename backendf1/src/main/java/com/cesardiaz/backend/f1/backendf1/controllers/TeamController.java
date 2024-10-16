@@ -11,13 +11,13 @@ import com.cesardiaz.backend.f1.backendf1.utils.TeamCommandEnum;
 import com.google.common.base.Preconditions;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,19 +37,23 @@ public class TeamController {
 
     @PostMapping("/team")
     @Operation(summary = "Creat new F1 team", description = "This endpoint creates new f1 teams if doesnt exist.")
-    public ResponseEntity<String> post(@RequestBody Map<String, String> requestMap) {
+    @Parameter(name = "TeamDto", description = "Set the attributes required to create a new team.")
+    @PreAuthorize("hasAuthority('ROLE_SUPERADMIN') or hasAuthority('CREATE_TEAM')")
+    public TeamDTO post(@RequestBody TeamDTO teamDTO) {
         //TODO: process POST request
         
-        Preconditions.checkNotNull(requestMap);
+        Preconditions.checkNotNull(teamDTO);
 
-        return teamService.createTeamRace(requestMap);
+        return teamService.createTeamRace(teamDTO);
     }
 
     
 
     @PostMapping("/team/{id}")
-    @Operation(summary = "Find a F1 team by id", description = "This endpoint gets a team registrated by id, if exist.")
-    public ResponseEntity<TeamDTO> get(@PathVariable(name = "id") Long teamId) {
+    @Operation(summary = "Find a F1 team by id", description = "Search a team's information.")
+    @Parameter(name = "teamId", description = "Id allow you to search one specific team.")
+    @PreAuthorize("hasAuthority('ROLE_SUPERADMIN') or hasAuthority('GET_TEAM')")
+    public TeamDTO get(@PathVariable(name = "id") Long teamId) {
         //TODO: process POST request
         
         Preconditions.checkNotNull(teamId);
@@ -59,8 +63,12 @@ public class TeamController {
 
     
     @PostMapping("/teams")
-    @Operation(summary = "Find a F1 teams by Page", description = "This endpoint gets teams with differets types of returns. Depends by command.")
-    public ResponseEntity<Page<TeamView>> getAll(
+    @Operation(summary = "Find a F1 teams by Page", description = "Search a pagable of teams with diferents type of searching.")
+    @Parameter(name = "command", description = "This param allow you to select an specific type of search as all of teams or the actived teams from this seasson.")
+    @Parameter(name = "page", description = "This param is the number of pages.")
+    @Parameter(name = "size", description = "This param is the size of elements in a page.")
+    @PreAuthorize("hasAuthority('ROLE_SUPERADMIN') or hasAuthority('GET_TEAMS')")
+    public Page<TeamView> getAll(
         @RequestParam(name = "command", defaultValue = "actual_teams") Optional<TeamCommandEnum> command,
         @RequestParam(name = "page", defaultValue = "0") int page,
         @RequestParam(name = "size", defaultValue = "10") int size ) {
