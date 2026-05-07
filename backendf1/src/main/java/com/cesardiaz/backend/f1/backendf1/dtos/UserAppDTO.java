@@ -19,7 +19,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class UserAppDTO {
-
     
 	@JsonInclude(value = Include.NON_NULL)
     private Long id;
@@ -34,10 +33,6 @@ public class UserAppDTO {
     private String username;
 
 	@JsonInclude(value = Include.NON_NULL)
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private String password;
-
-	@JsonInclude(value = Include.NON_NULL)
     private Date dateCreated;
 
 	@JsonInclude(value = Include.NON_NULL)
@@ -46,5 +41,4 @@ public class UserAppDTO {
 	@JsonInclude(value = Include.NON_NULL)
     private Collection<RoleDTO> roles;
 
-    
 }

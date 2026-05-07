@@ -8,6 +8,7 @@ import lombok.Getter;
 public enum ErrorKeyEnum {
 
     BAD_REQUEST("error.msg.bad.request","El la peticion es incorrect."),
+    BAD_REQUEST_USER_EXIST("error.msg.bad.request.user.exist","El nombre de usuario está duplicado."),
     // Recurso no encontrado
     NOT_FOUND("error.msg.not.found","El recurso solicitado no pudo ser encontrado."),
     NOT_FOUND_RESOURCE("error.msg.not.found.resource","No se pudo encontrar el recurso especificado: %s."),
@@ -23,6 +24,6 @@ public enum ErrorKeyEnum {
     RESET_PASSWORD_VALIDATION("error.msg.reset.password","La contraseña es incorrecta."),
     RESET_PASSWORD_SIMILAR("error.msg.reset.password","La nueva contraseña es igual a la anterior.");
 
-    private String key;
-    private String message;
+    private final String key;
+    private final String message;
 }

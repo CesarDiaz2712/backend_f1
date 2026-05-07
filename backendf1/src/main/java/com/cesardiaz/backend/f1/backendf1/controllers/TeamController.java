@@ -40,7 +40,6 @@ public class TeamController {
     @Parameter(name = "TeamDto", description = "Set the attributes required to create a new team.")
     @PreAuthorize("hasAuthority('ROLE_SUPERADMIN') or hasAuthority('CREATE_TEAM')")
     public TeamDTO post(@RequestBody TeamDTO teamDTO) {
-        //TODO: process POST request
         
         Preconditions.checkNotNull(teamDTO);
 
@@ -54,7 +53,6 @@ public class TeamController {
     @Parameter(name = "teamId", description = "Id allow you to search one specific team.")
     @PreAuthorize("hasAuthority('ROLE_SUPERADMIN') or hasAuthority('GET_TEAM')")
     public TeamDTO get(@PathVariable(name = "id") Long teamId) {
-        //TODO: process POST request
         
         Preconditions.checkNotNull(teamId);
 
@@ -72,7 +70,6 @@ public class TeamController {
         @RequestParam(name = "command", defaultValue = "actual_teams") Optional<TeamCommandEnum> command,
         @RequestParam(name = "page", defaultValue = "0") int page,
         @RequestParam(name = "size", defaultValue = "10") int size ) {
-        //TODO: process POST request
         
         Preconditions.checkNotNull(command);
         Preconditions.checkNotNull(page);

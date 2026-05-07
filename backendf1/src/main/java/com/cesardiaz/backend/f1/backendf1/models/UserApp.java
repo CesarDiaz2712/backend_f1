@@ -5,7 +5,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.cesardiaz.backend.f1.backendf1.dtos.UserAppDTO;
+import com.cesardiaz.backend.f1.backendf1.requests.UserAppRequest;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
@@ -83,18 +83,22 @@ public class UserApp extends AbstractPersistableCustom<Long>{
         setId(id);
     }
 
-    public UserApp updateInfoUser(UserAppDTO userAppDTO){
+    public UserApp updateInfoUser(UserAppRequest userAppDTO){
 
         if (userAppDTO.getUsername() != null && !userAppDTO.getUsername().equals(this.username)) {
             setUsername(userAppDTO.getUsername());
         }
 
-        if (userAppDTO.getFirstname() != null && !userAppDTO.getFirstname().equals(firstname)) {
-            setFirstname(userAppDTO.getFirstname());;
+        if (userAppDTO.getFirstname() != null && !userAppDTO.getFirstname().equals(this.firstname)) {
+            setFirstname(userAppDTO.getFirstname());
         }
         
-        if (userAppDTO.getLastname() != null && !userAppDTO.getLastname().equals(lastname)) {
-            setLastname(userAppDTO.getLastname());;
+        if (userAppDTO.getLastname() != null && !userAppDTO.getLastname().equals(this.lastname)) {
+            setLastname(userAppDTO.getLastname());
+        }
+
+        if (userAppDTO.getUsername() != null && !userAppDTO.getUsername().equals(this.username)) {
+            setUsername(userAppDTO.getLastname());
         }
         
         return this;

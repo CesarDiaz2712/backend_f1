@@ -33,10 +33,9 @@ public class SpringSecurityConfig {
    @Bean
    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
       return http.authorizeHttpRequests((authz) -> authz
-      // .requestMatchers(HttpMethod.POST, "/api/user").permitAll()
-            // .requestMatchers(HttpMethod.PUT, "/api/user/{userId}").permitAll()
+       .requestMatchers(HttpMethod.POST, "/api/user").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/teams", "/api/team/{id}").permitAll()
-            // .requestMatchers(HttpMethod.GET, "/api/user/{id}").hasAnyRole("ADMIN","SUPERUSER","USER")
+             .requestMatchers(HttpMethod.GET, "/api/user/{id}").hasAnyRole("ADMIN","SUPERUSER","USER")
             .requestMatchers(HttpMethod.GET, "/api/driver/{id}", "/api/drivers").hasAnyAuthority("ADMIN", "SUPERUSER","CREATE_DRIVER")
             .requestMatchers(HttpMethod.POST, "/api/driver","/api/team", "/api/contractdriver/{id}").hasAnyAuthority("SUPERADMIN", "SUPERUSER")
             .requestMatchers(HttpMethod.PUT,  "/api/contractdriver/{id}").hasAnyRole("ADMIN", "SUPERUSER")
