@@ -1,0 +1,10 @@
+FROM bellsoft/liberica-openjdk-debian:17
+
+RUN mkdir -p /home/myapp
+
+COPY wait-for-it.sh wait-for-it.sh
+COPY target/backf1-api.jar backf1-api.jar
+
+RUN chmod +x wait-for-it.sh
+
+ENTRYPOINT ["./wait-for-it.sh", "mysql_db:3306", "--", "java", "-jar", "backf1-api.jar"]

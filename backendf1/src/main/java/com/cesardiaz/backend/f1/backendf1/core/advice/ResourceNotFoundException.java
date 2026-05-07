@@ -1,11 +1,14 @@
 package com.cesardiaz.backend.f1.backendf1.core.advice;
 
-public class ResourceNotFoundException  extends RuntimeException{
+import org.springframework.http.HttpStatus;
 
-	private static final long serialVersionUID = 4482764241994136778L;
-	
-	public ResourceNotFoundException(Object resourceId) {
-		super(resourceId.toString());
-	}
+import com.cesardiaz.backend.f1.backendf1.core.constants.ErrorKeyEnum;
 
+public class ResourceNotFoundException  extends CustomException{
+
+	private static final HttpStatus httpStatus=HttpStatus.NOT_FOUND;
+    
+    public ResourceNotFoundException(ErrorKeyEnum errorKeyEnum) {
+        super(errorKeyEnum, httpStatus);
+    }
 }

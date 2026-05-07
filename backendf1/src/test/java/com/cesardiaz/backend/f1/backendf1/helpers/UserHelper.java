@@ -1,6 +1,7 @@
 package com.cesardiaz.backend.f1.backendf1.helpers;
 
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -30,7 +31,7 @@ public class UserHelper {
         
         UserApp user = null;
         user = new UserApp("Cesar JEsus", "stricline", "123", roles);
-        user.setDateCreated(LocalDate.now());
+        user.setDateCreated(new Date());
         return user;
     }
 
@@ -38,7 +39,7 @@ public class UserHelper {
         
         UserApp user = null;
         user = new UserApp(name, username, password, roles);
-        user.setDateCreated(LocalDate.now());
+        user.setDateCreated(new Date());
         return user;
     }
 }

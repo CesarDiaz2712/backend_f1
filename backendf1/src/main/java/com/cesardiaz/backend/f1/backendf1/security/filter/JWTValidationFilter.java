@@ -13,6 +13,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
+import com.cesardiaz.backend.f1.backendf1.dtos.DetailsUserData;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jsonwebtoken.Claims;
@@ -52,16 +53,22 @@ public class JWTValidationFilter extends BasicAuthenticationFilter {
 
             Claims claims = Jwts.parser().verifyWith(SECRET_KEY).build().parseSignedClaims(token).getPayload();
             String username = claims.get("username").toString();
+            String clientId = claims.get("clientId").toString();
             Object authoritiesClaims = claims.get("authorities");
 
+            // se agrega un mixing porque en la primera clase tiene la propiedad como role y
+            // nosotros lo nombramos authority, y se define en la segunda clase
+            // perzonalizada.
             Collection<? extends GrantedAuthority> authorities = Arrays.asList(new ObjectMapper()
-                    .addMixIn(SimpleGrantedAuthority.class, SimpleGrantedAuthorityJsonCreator.class)    //se agrega un mixing porque en la primera clase tiene la propiedad como role y nosotros lo nombramos authority, y se define en la segunda clase perzonalizada.
+                    .addMixIn(SimpleGrantedAuthority.class, SimpleGrantedAuthorityJsonCreator.class)
                     .readValue(authoritiesClaims.toString().getBytes(), SimpleGrantedAuthority[].class));
 
             // aqui no se valida el password por solo se valida el token, en la creacion del
             // token si es importante validar el password (JWRAuthenticationFilter).
             UsernamePasswordAuthenticationToken autAuthenticationToken = new UsernamePasswordAuthenticationToken(
                     username, null, authorities);
+            DetailsUserData detailsUserData = DetailsUserData.builder().userId(clientId).build();
+            autAuthenticationToken.setDetails(detailsUserData);
             SecurityContextHolder.getContext().setAuthentication(autAuthenticationToken);
             chain.doFilter(request, response);
         } catch (JwtException e) {
@@ -70,10 +77,12 @@ public class JWTValidationFilter extends BasicAuthenticationFilter {
 
             body.put("error", e.getMessage());
             body.put("message", "El token no es valido.");
-            
+
             response.getWriter().write(new ObjectMapper().writeValueAsString(body));
-            response.setStatus(HttpStatus.UNAUTHORIZED.value());;
-            response.setContentType(CONTENT_TYPE);;
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            ;
+            response.setContentType(CONTENT_TYPE);
+            ;
         }
 
     }

@@ -132,7 +132,7 @@ public class ContractDriverRepositoryTest {
     public void findContractDriverByContractDriverKeyAndStatusActivatedSuccess() {
         ContractDriverKey key = new ContractDriverKey(driverWithContractActivated.getId(), team.getId());
         Optional<ContractDriver> optionalContract = contractDriverRepository
-                .findContractDriverByContractDriverKeyAndStatus(key, true);
+                .findContractDriverByContractDriverKeyAndIsActived(key, true);
 
         assertThat(optionalContract).isPresent().isNotEmpty();
     }
@@ -141,7 +141,7 @@ public class ContractDriverRepositoryTest {
     public void findContractDriverByContractDriverKeyAndStatusActivatedUnsuccess() {
         ContractDriverKey key = new ContractDriverKey(anyLong(), anyLong());
         Optional<ContractDriver> optionalContract = contractDriverRepository
-                .findContractDriverByContractDriverKeyAndStatus(key, true);
+                .findContractDriverByContractDriverKeyAndIsActived(key, true);
 
         assertThat(optionalContract).isNotPresent();
     }
@@ -150,7 +150,7 @@ public class ContractDriverRepositoryTest {
     public void findContractDriverByContractDriverKeyAndStatusNonActivatedSuccess() {
         ContractDriverKey key = new ContractDriverKey(driverWithContractNoActivated.getId(), team.getId());
         Optional<ContractDriver> optionalContract = contractDriverRepository
-                .findContractDriverByContractDriverKeyAndStatus(key, false);
+                .findContractDriverByContractDriverKeyAndIsActived(key, false);
 
         assertThat(optionalContract).isPresent().isNotEmpty();
     }
@@ -159,7 +159,7 @@ public class ContractDriverRepositoryTest {
     public void findContractDriverByContractDriverKeyAndStatusNonActivatedUnsuccess() {
         ContractDriverKey key = new ContractDriverKey(anyLong(), anyLong());
         Optional<ContractDriver> optionalContract = contractDriverRepository
-                .findContractDriverByContractDriverKeyAndStatus(key, false);
+                .findContractDriverByContractDriverKeyAndIsActived(key, false);
 
         assertThat(optionalContract).isNotPresent();
     }

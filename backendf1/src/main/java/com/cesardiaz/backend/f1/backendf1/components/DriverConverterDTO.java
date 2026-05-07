@@ -39,7 +39,7 @@ public class DriverConverterDTO {
 
         UserAppDTO userAppDTO = userConverterDto.convertEntityToDto(driverEntity.getUser());
 
-        return DriverDTO.instance(driverEntity.getId(), driverEntity.getName(), driverEntity.getLastname(), driverEntity.getGamertag(), driverEntity.getNumberDriver(), 
+        return DriverDTO.instance(driverEntity.getId(), driverEntity.getFirstname(), driverEntity.getLastname(), driverEntity.getGamertag(), driverEntity.getNumberDriver(), 
         driverEntity.getDatecreated()!=null? driverEntity.getDatecreated().toString():null, driverEntity.getDateUpdated()!=null? driverEntity.getDateUpdated().toString():null, userAppDTO);
     }
 }

@@ -8,7 +8,8 @@ public enum ApiErrorEnum {
 	INVALID_PARAMETERS("400", "A required parameter for this API operation is invalid or has not been provided"),
 	UNAUTHORIZED("401", "The username and password credentials are missing or invalid for the given request."),
 	RESOURCE_NOT_FOUND("404", "Could not find resource."),
-	INTERNAL_SERVER_ERROR("500", "An unknown Api exception was thrown");
+	INTERNAL_SERVER_ERROR("500", "An unknown Api exception was thrown"),
+	NULLPOINTER("500", "An Nullpointer exception was thrown in the process.");
 
 	private String clave;
 	private String descripcion;

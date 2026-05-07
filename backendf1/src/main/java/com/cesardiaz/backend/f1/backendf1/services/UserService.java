@@ -1,18 +1,18 @@
 package com.cesardiaz.backend.f1.backendf1.services;
 
-import java.util.Map;
-
-import org.springframework.http.ResponseEntity;
-
+import com.cesardiaz.backend.f1.backendf1.dtos.ResetPasswordData;
 import com.cesardiaz.backend.f1.backendf1.dtos.UserAppDTO;
+import com.cesardiaz.backend.f1.backendf1.requests.UserAppRequest;
 
 public interface UserService {
-
-    UserAppDTO createUser(UserAppDTO userAppDTO);
     
-    ResponseEntity<?> updateUser(Map<String,String> requestMap);
+    UserAppDTO updateUser(UserAppRequest userAppRequest, Long userId);
 
-    ResponseEntity<UserAppDTO> findUserById(Long id);
+    UserAppDTO findUserById(Long id);
 
-    ResponseEntity<String> signUp(Map<String, String> requestMap);
+    UserAppDTO findUserByUsernamePassword(String username);
+
+    UserAppDTO createUser(UserAppRequest userAppRequest);
+
+    void resetPassword(Long userId, ResetPasswordData resetPasswordData);
 }

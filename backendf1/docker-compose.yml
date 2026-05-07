@@ -1,0 +1,40 @@
+
+services:
+  java-app:
+    container_name: f1_api_container
+    image: backf1-api:1.0
+    build: . #mismo directorio donde se ubica el archivo dockerdile para ubicar la imagen y poder construir el contenedor
+    ports: 
+      - 8080:8080
+    environment: 
+      - DB_URL=jdbc:mysql://mysql_db:3306/f1system
+      - DB_USERNAME=mickey
+      - DB_PASSWORD=thiswassonoright
+    depends_on:
+      - mysql_db
+    networks:
+      - f1-network
+    entrypoint: ["./wait-for-it.sh", "mysql_db:3306", "--", "java", "-jar", "backf1-api.jar"]  # Usar wait-for-it
+  mysql_db:
+    container_name: mysql_container
+    image: mysql:8.0
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword    # Contraseña para el usuario root
+      MYSQL_DATABASE: f1system                # Nombre de la base de datos inicial
+      MYSQL_USER: mickey                     # Nombre de usuario para la base de datos
+      MYSQL_PASSWORD: thiswassonoright
+    volumes:
+      - mysql-data:/var/lib/f1system         # Volumen para persistencia de datos
+    networks:
+      - f1-network
+
+volumes:
+  mysql-data:  # Volumen persistente para almacenar los datos de MySQL
+
+networks:
+  f1-network:
+    driver: bridge
+
+

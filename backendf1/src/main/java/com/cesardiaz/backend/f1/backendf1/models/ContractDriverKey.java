@@ -6,7 +6,7 @@ import jakarta.persistence.Embeddable;
 @Embeddable
 public class ContractDriverKey {
     
-    @Column(name= "race_driver_id")
+    @Column(name= "driver_id")
     private Long driverId;
 
     @Column(name= "team_id")

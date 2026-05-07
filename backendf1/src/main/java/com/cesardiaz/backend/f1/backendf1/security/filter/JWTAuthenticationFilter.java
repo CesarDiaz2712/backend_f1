@@ -14,7 +14,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.cesardiaz.backend.f1.backendf1.dtos.UserAppDTO;
 import com.cesardiaz.backend.f1.backendf1.models.UserApp;
+import com.cesardiaz.backend.f1.backendf1.services.UserService;
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,15 +33,16 @@ import static com.cesardiaz.backend.f1.backendf1.security.TokenJwtConfig.*;
 public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private AuthenticationManager authenticationManager;
+    private final UserService userService;
 
-    public JWTAuthenticationFilter(AuthenticationManager authenticationManager) {
+    public JWTAuthenticationFilter(AuthenticationManager authenticationManager, UserService userService) {
+        this.userService = userService;
         this.authenticationManager = authenticationManager;
     }
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException {
-        // TODO Auto-generated method stub
 
         UserApp user = null;
         String username = null;
@@ -50,13 +53,10 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
             username = user.getUsername();
             password = user.getPassword();
         } catch (StreamReadException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (DatabindException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
@@ -68,18 +68,19 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
             Authentication authResult) throws IOException, ServletException {
-        // TODO Auto-generated method stub
 
         User user = (User) authResult.getPrincipal();
         String username = user.getUsername();
 
         Collection<? extends GrantedAuthority> roles = authResult.getAuthorities();
 
+        UserAppDTO userApp = userService.findUserByUsernamePassword(username);
+
         Claims claims = Jwts.claims()
                 .add("authorities", new ObjectMapper().writeValueAsString(roles))
                 .add("username", username)
+                .add("clientId", userApp.getId())
                 .build();
-
         String jwt = Jwts.builder()
                 .subject(username)
                 .claims(claims)
@@ -105,7 +106,6 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
             AuthenticationException failed) throws IOException, ServletException {
-        // TODO Auto-generated method stub
 
         Map<String, String> map = new HashMap<>();
         map.put("message", "Error en la authenticacion, username o password incorrectos!");

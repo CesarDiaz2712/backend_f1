@@ -1,188 +1,239 @@
 package com.cesardiaz.backend.f1.backendf1.services;
 
-import java.time.LocalDate;
-import java.util.Map;
+import java.util.Date;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import com.cesardiaz.backend.f1.backendf1.requests.UserAppRequest;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.cesardiaz.backend.f1.backendf1.components.UserConverterDto;
-import com.cesardiaz.backend.f1.backendf1.constans.MessageCustom;
+import com.cesardiaz.backend.f1.backendf1.core.advice.BadRequestCustomException;
+import com.cesardiaz.backend.f1.backendf1.core.advice.ResourceNotFoundException;
+import com.cesardiaz.backend.f1.backendf1.core.constants.ErrorKeyEnum;
+import com.cesardiaz.backend.f1.backendf1.dtos.DetailsUserData;
+import com.cesardiaz.backend.f1.backendf1.dtos.ResetPasswordData;
 import com.cesardiaz.backend.f1.backendf1.dtos.UserAppDTO;
+import com.cesardiaz.backend.f1.backendf1.models.ResetPasswordEntity;
 import com.cesardiaz.backend.f1.backendf1.models.Role;
 import com.cesardiaz.backend.f1.backendf1.models.UserApp;
-import com.cesardiaz.backend.f1.backendf1.repositories.RoleRepository;
+import com.cesardiaz.backend.f1.backendf1.repositories.ResetPasswordRepository;
 import com.cesardiaz.backend.f1.backendf1.repositories.UserRepository;
-import com.cesardiaz.backend.f1.backendf1.utils.ResponseEntityCustom;
 import com.cesardiaz.backend.f1.backendf1.utils.validation.UserAppValidationRequest;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.transaction.Transactional;
+
+/**
+ * Implementation of {@link UserService} that handles all business logic
+ * related to application user management.
+ * <p>
+ * Provides functionality for creating, updating, and retrieving users,
+ * as well as managing password resets with an audit trail.
+ * </p>
+ */
 @Service
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserConverterDto userConverterDto;
     private final PasswordEncoder passwordEncoder;
     private final UserAppValidationRequest appValidationForm;
-    private final RoleRepository roleRepository;
-    
-    @Autowired
-    public UserServiceImpl(UserRepository userRepository, UserConverterDto userConverterDto, PasswordEncoder passwordEncoder, UserAppValidationRequest appValidationForm, RoleRepository roleRepository) {
+    private final ResetPasswordRepository resetPasswordRepository;
+    private final ObjectMapper mapper;
+
+    public UserServiceImpl(UserRepository userRepository, UserConverterDto userConverterDto,
+                           PasswordEncoder passwordEncoder, UserAppValidationRequest appValidationForm, ResetPasswordRepository resetPasswordRepository, ObjectMapper mapper) {
         this.userRepository = userRepository;
         this.userConverterDto = userConverterDto;
         this.passwordEncoder = passwordEncoder;
         this.appValidationForm = appValidationForm;
-        this.roleRepository = roleRepository;
+        this.resetPasswordRepository = resetPasswordRepository;
+        this.mapper = mapper;
     }
 
+    /**
+     * Updates the information of an existing user.
+     * <p>
+     * Validates that the ID is not null, that the request parameters are valid,
+     * that the user exists, and that the new username is not already taken
+     * by a different user.
+     * </p>
+     *
+     * @param userAppRequest object containing the updated user data
+     * @param userId         ID of the user to update
+     * @return {@link UserAppDTO} with the updated user information
+     * @throws NullPointerException      if {@code userId} is null
+     * @throws ResourceNotFoundException if no user is found with the given ID
+     * @throws BadRequestCustomException if the username is already in use by another user
+     */
     @Override
-    public UserAppDTO createUser(UserAppDTO userAppDTO) {
-        // TODO Auto-generated method stub
+    @Transactional
+    public UserAppDTO updateUser(UserAppRequest userAppRequest, Long userId) {
 
-        UserApp user = this.userRepository.save(userConverterDto.convertDtoToEntity(userAppDTO));
-        return this.userConverterDto.convertEntityToDto(user);
-    }
+        if (userId == null)
+            throw new NullPointerException();
 
-    @Override
-    public ResponseEntity<?> updateUser(Map<String,String> requestMap) {
-        // TODO Auto-generated method stub
+        appValidationForm.validateParamsToUpdateUser(userAppRequest);
 
-        if(appValidationForm.validateIdMap(requestMap)){
+        Optional<UserApp> userOptional = userRepository.findById(userId);
 
-            try {
-                
-            Optional<UserApp> userOptional  = userRepository.findById(Long.parseLong(requestMap.get("id")));
-
-            if(!userOptional.isPresent()){
-                return ResponseEntity.notFound().build();
-            }
-
-            UserApp user = userOptional.get();
-            boolean flag= false;
-
-            if(requestMap.containsKey("username") && requestMap.get("username")!=null){
-                user.setUsername(requestMap.get("username"));
-                flag = true;
-            }
-
-            if(requestMap.containsKey("password") && requestMap.get("password")!=null){
-                user.setUsername(passwordEncoder.encode(requestMap.get("password")));
-                flag = true;
-            }
-
-            if(flag){
-                user.setDateUpdated(LocalDate.now());
-                return ResponseEntityCustom.getResponseEntity("User updated", HttpStatus.OK);
-            }
-
-            return ResponseEntity.badRequest().build();
-            } catch (Exception e) {
-                // TODO: handle exception
-                e.printStackTrace();
-            }
-            return ResponseEntity.internalServerError().build();
-        }else{
-            return ResponseEntity.badRequest().build();
-        }
-    }
-
-    @Override
-    public ResponseEntity<UserAppDTO> findUserById(Long id) {
-        // TODO Auto-generated method stub
-
-        if(id == null){
-            return ResponseEntity.badRequest().build();
+        if (userOptional.isEmpty()) {
+            throw new ResourceNotFoundException(ErrorKeyEnum.NOT_FOUND);
         }
 
-        try {
-         
+        if (userRepository.existUsernameDuplicatedByOtherUser(userAppRequest.getUsername(), userId))
+            throw new BadRequestCustomException(ErrorKeyEnum.BAD_REQUEST_USER_EXIST);
+
+        UserApp userApp = userOptional.get();
+
+        return userConverterDto.convertEntityToDto(userApp.updateInfoUser(userAppRequest));
+
+    }
+
+    /**
+     * Retrieves a user by their ID.
+     *
+     * @param id the ID of the user to retrieve
+     * @return {@link UserAppDTO} with the found user's information
+     * @throws NullPointerException      if {@code id} is null
+     * @throws ResourceNotFoundException if no user is found with the given ID
+     */
+    @Override
+    public UserAppDTO findUserById(Long id) {
+
+        if (id == null) {
+            throw new NullPointerException();
+        }
 
         Optional<UserApp> userOptional = this.userRepository.findById(id);
 
-        if(!userOptional.isPresent())
-            return ResponseEntity.notFound().build();
+        if (userOptional.isEmpty())
+            throw new ResourceNotFoundException(ErrorKeyEnum.NOT_FOUND);
 
+        return this.userConverterDto.convertEntityToDto(userOptional.get());
 
-        return ResponseEntity.ok().body(this.userConverterDto.convertEntityToDto(userOptional.get()));   
-        
-        } catch (Exception e) {
-            // TODO: handle exception
-               e.printStackTrace();
-        }
-        return ResponseEntity.internalServerError().build();   
- 
     }
 
+    /**
+     * Creates and persists a new user in the system.
+     * <p>
+     * Validates the input parameters, verifies that the username does not
+     * already exist, encodes the password, assigns the user's roles,
+     * and saves the new user.
+     * </p>
+     *
+     * @param userAppRequest object containing the new user's data
+     * @return {@link UserAppDTO} with the created user's information
+     * @throws BadRequestCustomException if the username already exists in the system
+     */
     @Override
-    public ResponseEntity<String> signUp(Map<String, String> requestMap) {
-        // TODO Auto-generated method stub
+    public UserAppDTO createUser(UserAppRequest userAppRequest) {
 
-        try {
-            if(appValidationForm.validateSignUpMap(requestMap)){
-                Optional<UserApp> userApp = userRepository.findByUsername(requestMap.get("username"));
-                if(!userApp.isPresent()){
-                    UserApp user = getUserFromMap(requestMap);
-                    Optional<Role> optionalRole = roleRepository.findById(user.getNewRole().getId());
+        appValidationForm.validateParamsToCreateUser(userAppRequest);
 
-                    if(optionalRole.isPresent()){
-                        user.setRole(optionalRole.get());
-                    }else{
-                        return ResponseEntity.badRequest().build();
-                    }
+        Optional<UserApp> userAppOptinal = userRepository.findByUsername(userAppRequest.getUsername());
 
-                    userRepository.save(user);
+        if (userAppOptinal.isEmpty()) {
+            UserApp user = userConverterDto.convertDtoToEntity(userAppRequest);
+            user.setPassword(passwordEncoder.encode(userAppRequest.getPassword()));
 
-                    return ResponseEntityCustom.getResponseEntity("Usuario registrado", HttpStatus.CREATED);
-                }else{
-                    
-                    return ResponseEntityCustom.getResponseEntity("Usuario existente", HttpStatus.BAD_REQUEST);
-                }
-            }else{
-                return ResponseEntityCustom.getResponseEntity(MessageCustom.INVALID_DATA, HttpStatus.BAD_REQUEST); 
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return ResponseEntityCustom.getResponseEntity(MessageCustom.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    // private boolean validateSignUpMap(Map<String, String> requestMap){
-
-    //     if(requestMap.containsKey("name") && requestMap.containsKey("username") && requestMap.containsKey("password")
-    //     && requestMap.containsKey("role")){
-    //         return true;
-    //     }else
-    //     return false;
-    // }
-
-    private UserApp getUserFromMap(Map<String, String> requestMap){
-
-        if(requestMap!=null){
-
-            String idRole = requestMap.get("role");
-
-            Long idRoleLong= null;
-            try {
-                idRoleLong = Long.parseLong(idRole);
-            } catch (Exception e) {
-                // TODO: handle exception
+            for (Role role : user.getRoles()) {
+                user.addNewRole(role);
             }
 
-            UserApp userApp = new UserApp();
-            userApp.setUsername(requestMap.get("username"));
-            userApp.setPassword(passwordEncoder.encode(requestMap.get("password")));
-            userApp.setName(requestMap.get("name"));
-            userApp.setDateCreated(LocalDate.now());
-            userApp.setNewRole(new Role(idRoleLong));
-            
-            return userApp;
-        }else{
-            throw new NullPointerException("RequestMap is null" + requestMap);
+            user.setDateCreated(new Date());
+
+            userRepository.save(user);
+
+            return userConverterDto.convertEntityToDto(user);
+        } else {
+            throw new BadRequestCustomException(ErrorKeyEnum.DATA_DUPLICATED, null);
         }
+
     }
-    
+
+    /**
+     * Resets the password of an authenticated user.
+     * <p>
+     * Verifies that the provided old password matches the current one,
+     * ensures the new password is different from the current one, updates
+     * the password, and saves an audit record of the change linked to the
+     * authenticated user who performed the action.
+     * </p>
+     * <p>
+     * <b>TODO:</b> Send an email notification to the user after a successful reset.
+     * </p>
+     *
+     * @param userId            ID of the user whose password is being reset
+     * @param resetPasswordData object containing the old and new passwords
+     * @throws NullPointerException      if {@code userId} is null
+     * @throws ResourceNotFoundException if no user is found with the given ID
+     * @throws BadRequestCustomException if the old password does not match the current one,
+     *                                   or if the new password is the same as the current one
+     */
+    @Override
+    @Transactional
+    public void resetPassword(Long userId, ResetPasswordData resetPasswordData) {
+
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		
+        if (userId == null)
+            throw new NullPointerException();
+
+        appValidationForm.validateParamsToResetPassword(resetPasswordData);
+
+        Optional<UserApp> userOptional = userRepository.findById(userId);
+
+        if (!userOptional.isPresent()) {
+            throw new ResourceNotFoundException(ErrorKeyEnum.NOT_FOUND);
+        }
+
+        UserApp userApp = userOptional.get();
+
+        if (!passwordEncoder.matches( resetPasswordData.getOldPassword(), userApp.getPassword()))
+            throw new BadRequestCustomException(ErrorKeyEnum.RESET_PASSWORD_VALIDATION, null);
+
+        if (passwordEncoder.matches(resetPasswordData.getNewPassword(), userApp.getPassword()))
+            throw new BadRequestCustomException(ErrorKeyEnum.RESET_PASSWORD_SIMILAR, null);
+
+        String oldPasswordEncode = passwordEncoder.encode(resetPasswordData.getOldPassword());
+        String newPasswordEncode = passwordEncoder.encode(resetPasswordData.getNewPassword());
+        userApp.setPassword(newPasswordEncode);
+
+        DetailsUserData detailsUserData = mapper.convertValue(authentication.getDetails(), DetailsUserData.class);
+
+        ResetPasswordEntity resetPasswordEntity = new ResetPasswordEntity(detailsUserData.getUserId(), new Date(), userApp, oldPasswordEncode,
+                newPasswordEncode);
+        resetPasswordRepository.save(resetPasswordEntity);
+
+        // sendNotification to email.
+    }
+
+    /**
+     * Retrieves a user by their username.
+     *
+     * @param username the username to search for
+     * @return {@link UserAppDTO} with the found user's information
+     * @throws NullPointerException      if {@code username} is null
+     * @throws ResourceNotFoundException if no user is found with the given username
+     */
+    @Override
+    public UserAppDTO findUserByUsernamePassword(String username) {
+        
+        if (username == null) {
+            throw new NullPointerException();
+        }
+
+        Optional<UserApp> userOptional = this.userRepository.findByUsername(username);
+
+        if (!userOptional.isPresent())
+            throw new ResourceNotFoundException(ErrorKeyEnum.NOT_FOUND);
+
+        return this.userConverterDto.convertEntityToDto(userOptional.get());
+
+    }
+
 }

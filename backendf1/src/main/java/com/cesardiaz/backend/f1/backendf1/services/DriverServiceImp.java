@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.Map;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -32,7 +31,6 @@ public class DriverServiceImp implements DriverService {
     private final UserRepository userRepository;
     private final DriverConverterDTO driverConverterDTO;
 
-    @Autowired
     public DriverServiceImp(DriverValidationRequest driverValidationRequest, DriverFormulaRepository driverRepository,
             UserRepository userRepository, DriverConverterDTO driverConverterDTO) {
         this.driverValidationRequest = driverValidationRequest;
@@ -45,8 +43,6 @@ public class DriverServiceImp implements DriverService {
     @Override
     @Transactional
     public ResponseEntity<?> createNewDriver(Map<String, String> requestMap) {
-        // TODO Auto-generated method stub
-
         try {
 
             if (driverValidationRequest.validateParamsToCreate(requestMap)) {
@@ -75,7 +71,6 @@ public class DriverServiceImp implements DriverService {
                 return ResponseEntity.badRequest().build();
             }
         } catch (Exception e) {
-            // TODO: handle exception
             e.printStackTrace();
             throw new RuntimeException("Internal server error");
         }

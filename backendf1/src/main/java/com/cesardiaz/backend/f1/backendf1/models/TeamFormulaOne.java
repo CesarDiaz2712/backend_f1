@@ -6,33 +6,41 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
-@Table(name = "team")
+@Getter
+@Setter
+@Builder
+@AllArgsConstructor
+@Table(name = "team_scuderia")
 @NamedQuery(name = "TeamFormulaOne.findAll", query = "SELECT tf FROM TeamFormulaOne tf")
 @NoArgsConstructor
-public class TeamFormulaOne extends AbstractPersistableCustom<Long>{
+public class TeamFormulaOne extends AbstractPersistableCustom<Long> {
 
-    @Column(name = "name", columnDefinition = "varchar(30)", unique = true)
+    @Column(name = "name", columnDefinition = "varchar(45)", unique = true, nullable = false)
     private String name;
 
-    @Column(name = "alias", columnDefinition = "varchar(5)")
+    @Column(name = "alias", columnDefinition = "varchar(20)", nullable = false)
     private String alias;
 
-    @Column(name = "year_register", columnDefinition = "varchar(4)")
+    @Column(name = "year_register", columnDefinition = "varchar(5)", nullable = false)
     private String yearRegister;
 
-    @Column(name = "teamChief", columnDefinition = "varchar(40)")
+    @Column(name = "team_chief", columnDefinition = "varchar(45)", nullable = false)
     private String teamChief;
 
-    @Column(name = "technical_chief", columnDefinition = "varchar(40)")
+    @Column(name = "technical_chief", columnDefinition = "varchar(45)", nullable = false)
     private String technicalChief;
 
-    @Column(name = "dateCreated")
+    @Column(name = "date_created", nullable = false)
     private Date dateCreated;
 
-    @Column(name = "dateUpdated")
+    @Column(name = "date_updated")
     private Date dateUpdated;
 
     public TeamFormulaOne(Long id, String name, String alias, String yearRegister, String teamChief,
@@ -47,65 +55,8 @@ public class TeamFormulaOne extends AbstractPersistableCustom<Long>{
         this.dateUpdated = dateUpdated;
     }
 
-    public TeamFormulaOne(Long id){
+    public TeamFormulaOne(Long id) {
         setId(id);
     }
-    
-    public String getName() {
-        return name;
-    }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getAlias() {
-        return alias;
-    }
-
-    public void setAlias(String alias) {
-        this.alias = alias;
-    }
-
-    public String getYearRegister() {
-        return yearRegister;
-    }
-
-    public void setYearRegister(String yearRegister) {
-        this.yearRegister = yearRegister;
-    }
-
-    public String getTeamChief() {
-        return teamChief;
-    }
-
-    public void setTeamChief(String teamChief) {
-        this.teamChief = teamChief;
-    }
-
-    public String getTechnicalChief() {
-        return technicalChief;
-    }
-
-    public void setTechnicalChief(String technicalChief) {
-        this.technicalChief = technicalChief;
-    }
-
-    public Date getDateCreated() {
-        return dateCreated;
-    }
-
-    public void setDateCreated(Date dateCreated) {
-        this.dateCreated = dateCreated;
-    }
-
-    public Date getDateUpdated() {
-        return dateUpdated;
-    }
-
-    public void setDateUpdated(Date dateUpdated) {
-        this.dateUpdated = dateUpdated;
-    }
-
-    
 }

@@ -64,7 +64,7 @@ public class DriverServiceTest {
                 DriverDTO dto =   driverService.getDriverDTO(id);
                 DriverFormulaOne entity = driverToFindOptional.get();
                 assertThat(dto.getId()).isSameAs(entity.getId());
-                assertThat(dto.getName()).isSameAs(entity.getName());
+                assertThat(dto.getName()).isSameAs(entity.getFirstname());
                 assertThat(dto.getLastname()).isSameAs(entity.getLastname());
                 assertThat(dto.getGamertag()).isSameAs(entity.getGamertag());
                 assertThat(dto.getNumberDriver()).isSameAs(entity.getNumberDriver());

@@ -4,43 +4,56 @@ import java.time.LocalDate;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @NamedQuery(name = "ResultRace.findAll", query = "SELECT rr FROM ResultRace rr")
 @Table(name = "result_race")
-public class ResultRace extends AbstractPersistableCustom<Long>{
+public class ResultRace extends AbstractPersistableCustom<Long> {
 
     @Column(name = "points", nullable = false)
     private Double points;
 
-    @Column(name = "dnf", nullable = false)
+    @Column(name = "dnf")
     private Boolean dnf;
-    @Column(name = "dns", nullable = false)
+    @Column(name = "dns")
     private Boolean dns;
-    @Column(name = "dnq", nullable = false)
+    @Column(name = "dnq")
     private Boolean dnq;
-    
-    @ManyToOne
-    @JoinColumn(name = "record_fastlap_id")
-    private RecordFastLap recordFastLap;
-    
-    @Column(name= "date_created")
-    private LocalDate datecreated;
-    
-    @Column(name= "date_updated")
-    private LocalDate dateUpdated;
 
-    @ManyToOne
-    @JoinColumn(name = "race_driver_id")
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "record_fastlap_id", nullable = false, foreignKey = @ForeignKey(name = "fk_result_race_record_fastlap_id"))
+    private RecordFastLap recordFastLap;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "driver_id", nullable = false, foreignKey = @ForeignKey(name = "fk_result_race_driver_id"))
     private DriverFormulaOne driver;
 
-    @ManyToOne
-    @JoinColumn(name = "schedule_circuit_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "schedule_circuit_id", nullable = false, foreignKey = @ForeignKey(name = "fk_result_race_schedule_circuit_id"))
     private ScheduleGranPrix scheduleGranPrix;
+
+    @Column(name = "date_created", nullable = false)
+    private LocalDate datecreated;
+
+    @Column(name = "date_updated", nullable = true)
+    private LocalDate dateUpdated;
 
     public ResultRace(Double points, Boolean dnf, Boolean dns, Boolean dnq, RecordFastLap recordFastLap,
             LocalDate datecreated, LocalDate dateUpdated, DriverFormulaOne driver, ScheduleGranPrix scheduleGranPrix) {
@@ -55,77 +68,4 @@ public class ResultRace extends AbstractPersistableCustom<Long>{
         this.scheduleGranPrix = scheduleGranPrix;
     }
 
-    public Double getPoints() {
-        return points;
-    }
-
-    public void setPoints(Double points) {
-        this.points = points;
-    }
-
-    public Boolean getDnf() {
-        return dnf;
-    }
-
-    public void setDnf(Boolean dnf) {
-        this.dnf = dnf;
-    }
-
-    public Boolean getDns() {
-        return dns;
-    }
-
-    public void setDns(Boolean dns) {
-        this.dns = dns;
-    }
-
-    public Boolean getDnq() {
-        return dnq;
-    }
-
-    public void setDnq(Boolean dnq) {
-        this.dnq = dnq;
-    }
-
-    public RecordFastLap getRecordFastLap() {
-        return recordFastLap;
-    }
-
-    public void setRecordFastLap(RecordFastLap recordFastLap) {
-        this.recordFastLap = recordFastLap;
-    }
-
-    public LocalDate getDatecreated() {
-        return datecreated;
-    }
-
-    public void setDatecreated(LocalDate datecreated) {
-        this.datecreated = datecreated;
-    }
-
-    public LocalDate getDateUpdated() {
-        return dateUpdated;
-    }
-
-    public void setDateUpdated(LocalDate dateUpdated) {
-        this.dateUpdated = dateUpdated;
-    }
-
-    public DriverFormulaOne getDriver() {
-        return driver;
-    }
-
-    public void setDriver(DriverFormulaOne driver) {
-        this.driver = driver;
-    }
-
-    public ScheduleGranPrix getScheduleGranPrix() {
-        return scheduleGranPrix;
-    }
-
-    public void setScheduleGranPrix(ScheduleGranPrix scheduleGranPrix) {
-        this.scheduleGranPrix = scheduleGranPrix;
-    }
-
-    
 }

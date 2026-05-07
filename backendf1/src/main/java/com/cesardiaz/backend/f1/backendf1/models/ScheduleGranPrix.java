@@ -5,30 +5,47 @@ import java.util.Date;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@Builder
+@AllArgsConstructor
 @NamedQuery(name = "ScheduleGranPrix.findAll", query = "SELECT sc FROM ScheduleGranPrix sc")
 @Table(name = "schedule_circuit")
 public class ScheduleGranPrix extends AbstractPersistableCustom<Long>{
 
-    @Column(name= "date_scheduled")
+    @Column(name= "date_scheduled", nullable = false)
     private Date dateScheduled;
 
     @Column(name= "reversed")
     private Boolean reversed;  
 
-    @Column(name= "date_created")
+    @Column(name= "date_created", nullable = false)
     private LocalDate datecreated;
     
-    @Column(name= "date_updated")
+    @Column(name= "date_updated", nullable = true)
     private LocalDate dateUpdated;
 
-    @ManyToOne
-    @JoinColumn(name = "circuit_id")
+    @OneToOne
+    @JoinColumn(name = "schedule_replaced_id")
+    private ScheduleGranPrix circuitReplaced;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "circuit_id", nullable = false, foreignKey = @ForeignKey(name = "fk_schedule_circuit_circuit_id"))
     private Circuit circuit;
 
     public ScheduleGranPrix(Date dateScheduled, Boolean reversed, LocalDate datecreated, LocalDate dateUpdated,
@@ -40,45 +57,6 @@ public class ScheduleGranPrix extends AbstractPersistableCustom<Long>{
         this.circuit = circuit;
     }
 
-    public Date getDateScheduled() {
-        return dateScheduled;
-    }
-
-    public void setDateScheduled(Date dateScheduled) {
-        this.dateScheduled = dateScheduled;
-    }
-
-    public Boolean getReversed() {
-        return reversed;
-    }
-
-    public void setReversed(Boolean reversed) {
-        this.reversed = reversed;
-    }
-
-    public LocalDate getDatecreated() {
-        return datecreated;
-    }
-
-    public void setDatecreated(LocalDate datecreated) {
-        this.datecreated = datecreated;
-    }
-
-    public LocalDate getDateUpdated() {
-        return dateUpdated;
-    }
-
-    public void setDateUpdated(LocalDate dateUpdated) {
-        this.dateUpdated = dateUpdated;
-    }
-
-    public Circuit getCircuit() {
-        return circuit;
-    }
-
-    public void setCircuit(Circuit circuit) {
-        this.circuit = circuit;
-    }
 
     
 }
