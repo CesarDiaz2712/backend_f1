@@ -59,7 +59,29 @@ public class UserConverterDto {
      * @param userAppDTO the request object containing the user data to convert
      * @return a {@link UserApp} entity populated with the request's data
      */
-    public UserApp convertDtoToEntity(UserAppRequest userAppDTO) {
+    public UserApp convertRequestToEntity(UserAppRequest userAppDTO) {
+        Set<Role> roles = new HashSet<Role>();
+        if (userAppDTO.getRoles() != null && !userAppDTO.getRoles().isEmpty()) {
+            for (RoleDTO roleDto : userAppDTO.getRoles()) {
+                roles.add(new Role(roleDto.getId(), roleDto.getAuthority(), roleDto.getDescription()));
+            }
+        }
+
+        return new UserApp(userAppDTO.getFirstname(), userAppDTO.getUsername(), userAppDTO.getLastname(), roles);
+    }
+
+    /**
+     * Converts a {@link UserAppDTO} into a {@link UserApp} entity.
+     * <p>
+     * Maps the basic user fields and transforms each {@link RoleDTO}
+     * into a {@link Role} entity. If no roles are provided,
+     * an empty set is assigned to the user.
+     * </p>
+     *
+     * @param userAppDTO the DTO containing the user data to convert
+     * @return a {@link UserApp} entity populated with the DTO's data
+     */
+    public UserApp convertDtoToEntity(UserAppDTO userAppDTO) {
         Set<Role> roles = new HashSet<Role>();
         if (userAppDTO.getRoles() != null && !userAppDTO.getRoles().isEmpty()) {
             for (RoleDTO roleDto : userAppDTO.getRoles()) {

@@ -24,4 +24,16 @@ public interface DriverFormulaRepository extends JpaRepository<DriverFormulaOne,
 
     @Query(value = "select dr.id as id, dr.name as name, dr.lastname as lastname, dr.gamertag as gamertag, dr.number_driver as numberDriver, dr.date_created as dateCreated, dr.user_id as userId FROM f1_driver dr ", nativeQuery = true)
     Page<DriverDataView> findAllDrivers(Pageable pageable);
+
+    @Query(value = "Select CASE WHEN count(d.id) > 0 THEN true ELSE false END FROM f1_driver d WHERE user_id=:userId", nativeQuery = true)
+    boolean userIdAssignedToADriver(@Param("userId") Long userId);
+
+    @Query(value = """
+        SELECT CASE WHEN COUNT(d.id) > 0 THEN true ELSE false END
+        FROM driver_formula_one d
+        WHERE LOWER(d.firstname) LIKE LOWER(CONCAT('%', :firstname, '%'))
+        AND LOWER(d.lastname) LIKE LOWER(CONCAT('%', :lastname, '%'))
+        """, nativeQuery = true)
+    boolean existDriverByFullName(@Param("firstname") String firstname,
+                                  @Param("lastname") String lastname);
 }

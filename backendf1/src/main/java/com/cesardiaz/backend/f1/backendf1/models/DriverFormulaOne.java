@@ -45,6 +45,7 @@ public class DriverFormulaOne extends AbstractPersistableCustom<Long>{
     
     @Column(name= "date_updated", nullable = true)
     private LocalDate dateUpdated;
+
     
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "fk_f1_driver_user_id"))

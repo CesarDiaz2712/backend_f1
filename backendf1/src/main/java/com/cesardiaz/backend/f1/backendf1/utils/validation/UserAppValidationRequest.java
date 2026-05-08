@@ -23,7 +23,7 @@ import com.cesardiaz.backend.f1.backendf1.dtos.UserAppDTO;
  * </p>
  */
 @Component
-public class UserAppValidationRequest {
+public class UserAppValidationRequest extends ValidationParamsAbstract{
 
     /**
      * Validates that all required fields for creating a new user are present.
@@ -40,17 +40,10 @@ public class UserAppValidationRequest {
 
         List<String> params = new ArrayList<>();
 
-        if (StringUtils.isBlank(userAppDTO.getFirstname()))
-            params.add("firstname");
-
-        if (StringUtils.isBlank(userAppDTO.getLastname()))
-            params.add("lastname");
-
-        if (StringUtils.isBlank(userAppDTO.getUsername()))
-            params.add("username");
-
-        if (StringUtils.isBlank(userAppDTO.getPassword()))
-            params.add("password");
+        validateBlank(userAppDTO.getFirstname(), "firstname", params);
+        validateBlank(userAppDTO.getLastname(),  "lastname",  params);
+        validateBlank(userAppDTO.getUsername(),  "username",  params);
+        validateBlank(userAppDTO.getPassword(),  "password",  params);
 
         if (!params.isEmpty()) {
             throw new UnsopportedParamsException(params);
@@ -72,14 +65,9 @@ public class UserAppValidationRequest {
     public void validateParamsToUpdateUser(UserAppRequest userAppDTO){
 
         List<String> params = new ArrayList<>();
-        if (StringUtils.isBlank(userAppDTO.getFirstname()))
-            params.add("firstname");
-
-        if (StringUtils.isBlank(userAppDTO.getLastname()))
-            params.add("lastname");
-
-        if (StringUtils.isBlank(userAppDTO.getUsername()))
-            params.add("username");
+        validateBlank(userAppDTO.getFirstname(), "firstname", params);
+        validateBlank(userAppDTO.getLastname(),  "lastname",  params);
+        validateBlank(userAppDTO.getUsername(),  "username",  params);
 
         if (!params.isEmpty()) {
             throw new UnsopportedParamsException(params);
@@ -101,13 +89,9 @@ public class UserAppValidationRequest {
 
         List<String> params = new ArrayList<>();
 
-        if(resetPasswordData.getNewPassword() == null){
-            params.add("newPassword");
-        }
-        
-        if(resetPasswordData.getOldPassword() == null){
-            params.add("oldPassword");
-        }
+        validateBlank(resetPasswordData.getNewPassword(),  "newPassword",  params);
+        validateBlank(resetPasswordData.getOldPassword(), "oldPassword", params);
+
         if (!params.isEmpty()) {
             throw new UnsopportedParamsException(params);
         }

@@ -16,4 +16,10 @@ public interface ContractDriverRepository extends JpaRepository<ContractDriver, 
 
     @Query(value = "Select cd.race_driver_id, cd.team_id, cd.status, cd.date_initial_contract , cd.date_end_contract , cd.date_created, cd.date_updated  FROM contract_driver cd WHERE cd.is_actived = true ", nativeQuery = true)
     List<ContractDriver> findAllContractByTeamActivated();
+
+    @Query(value = "Select cd.* FROM contract_driver cd WHERE cd.driver_id =: driverId and cd.is_actived = true and "+
+            "        ORDER BY d.date_created DESC " +
+            "        LIMIT 1 ", nativeQuery = true)
+    Optional<ContractDriver> findRecentContractDriverByDriverId(@Param("driverId") Long driverId);
+
 }
