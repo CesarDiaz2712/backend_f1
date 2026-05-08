@@ -11,4 +11,8 @@ public class ResourceNotFoundException  extends CustomException{
     public ResourceNotFoundException(ErrorKeyEnum errorKeyEnum) {
         super(errorKeyEnum, httpStatus);
     }
+
+    public ResourceNotFoundException(ErrorKeyEnum errorKeyEnum, Object ... params) {
+        super(errorKeyEnum, httpStatus, params);
+    }
 }

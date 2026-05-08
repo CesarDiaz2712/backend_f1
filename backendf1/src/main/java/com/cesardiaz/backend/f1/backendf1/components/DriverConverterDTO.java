@@ -2,6 +2,7 @@ package com.cesardiaz.backend.f1.backendf1.components;
 
 import java.time.LocalDate;
 
+import com.cesardiaz.backend.f1.backendf1.requests.DriverRequest;
 import org.springframework.stereotype.Component;
 
 import com.cesardiaz.backend.f1.backendf1.dtos.DriverDTO;
@@ -29,6 +30,19 @@ public class DriverConverterDTO {
 
         return DriverFormulaOne.instance(driverDto.getId(), driverDto.getName(), driverDto.getLastname(), driverDto.getGamertag(), driverDto.getNumberDriver(), 
         driverDto.getDatecreated()!=null? LocalDate.parse(driverDto.getDatecreated()):null, driverDto.getDateUpdated()!=null? LocalDate.parse(driverDto.getDateUpdated()):null, userApp);
+    }
+
+    public DriverFormulaOne convertDriverRequestToEntity(DriverRequest driverRequest, UserAppDTO userAppDTO){
+
+        if(driverRequest == null){
+            return null;
+        }
+        UserApp userApp = null;
+        if (userAppDTO!=null)
+            userApp = userConverterDto.convertDtoToEntity(userAppDTO);
+
+        return DriverFormulaOne.builder().numberDriver(driverRequest.getNumberDriver()).firstname(driverRequest.getFirstname()).gamertag(driverRequest.getGamertag()).lastname(driverRequest.getLastname())
+                .user(userApp).build();
     }
 
     public DriverDTO convertEntityToDTO(DriverFormulaOne driverEntity){

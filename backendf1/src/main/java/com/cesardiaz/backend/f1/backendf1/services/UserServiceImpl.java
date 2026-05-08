@@ -137,7 +137,7 @@ public class UserServiceImpl implements UserService {
         Optional<UserApp> userAppOptinal = userRepository.findByUsername(userAppRequest.getUsername());
 
         if (userAppOptinal.isEmpty()) {
-            UserApp user = userConverterDto.convertDtoToEntity(userAppRequest);
+            UserApp user = userConverterDto.convertRequestToEntity(userAppRequest);
             user.setPassword(passwordEncoder.encode(userAppRequest.getPassword()));
 
             for (Role role : user.getRoles()) {
